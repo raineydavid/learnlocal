@@ -47,9 +47,6 @@ export default function SettingsTab() {
             style={styles.settingItem}
             onPress={() => setShowServerConfig(true)}
           >
-            style={styles.settingItem}
-            onPress={() => setShowServerConfig(true)}
-          >
             <View style={styles.settingLeft}>
               <Server size={20} color="#3B82F6" />
               <View style={styles.settingText}>
@@ -57,7 +54,6 @@ export default function SettingsTab() {
                 <Text style={styles.settingSubtitle}>{serverUrl}</Text>
               </View>
             </View>
-            <Edit3 size={16} color="#94A3B8" />
             <Edit3 size={16} color="#94A3B8" />
           </TouchableOpacity>
 
@@ -173,24 +169,10 @@ export default function SettingsTab() {
                 serverStatus === 'checking' ? 'Checking...' : 'Disconnected'
               }
             </Text>
-              serverStatus === 'online' ? styles.statusOnline : 
-              serverStatus === 'checking' ? styles.statusChecking : styles.statusOffline
-            ]} />
-            <Text style={styles.statusText}>
-              FastAPI Server: {
-                serverStatus === 'online' ? 'Connected' :
-                serverStatus === 'checking' ? 'Checking...' : 'Disconnected'
-              }
-            </Text>
           </View>
           <View style={styles.statusItem}>
             <View style={[
               styles.statusDot, 
-              serverStatus === 'online' ? styles.statusOnline : styles.statusOffline
-            ]} />
-            <Text style={styles.statusText}>
-              GPT-OSS Model: {serverStatus === 'online' ? 'Available' : 'Not Available'}
-            </Text>
               serverStatus === 'online' ? styles.statusOnline : styles.statusOffline
             ]} />
             <Text style={styles.statusText}>
@@ -201,13 +183,6 @@ export default function SettingsTab() {
             Make sure your FastAPI server is running on {serverUrl} with the GPT-OSS model loaded.
           </Text>
         </View>
-
-        <ServerConfigModal
-          visible={showServerConfig}
-          currentUrl={serverUrl}
-          onSave={handleServerUrlChange}
-          onClose={() => setShowServerConfig(false)}
-        />
 
         <ServerConfigModal
           visible={showServerConfig}
@@ -303,9 +278,6 @@ const styles = StyleSheet.create({
   },
   statusOnline: {
     backgroundColor: '#10B981',
-  },
-  statusChecking: {
-    backgroundColor: '#F59E0B',
   },
   statusChecking: {
     backgroundColor: '#F59E0B',
