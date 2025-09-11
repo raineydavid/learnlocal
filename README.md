@@ -254,49 +254,18 @@ const communityProgress = {
 
 ### **Backend Integration Options**
 
-#### **Option 1: External Flask Server (via ngrok)**
-- **API Layer**: Flask server with RESTful endpoints
-- **AI Model**: Local GPT-OSS model integration
-- **Deployment**: Running on remote machine, accessed via ngrok tunnel
-- **Use Case**: Shared AI server, remote GPU access, collaborative development
-
-#### **Option 1: External Flask Server (via ngrok)**
-- **API Layer**: Flask server with RESTful endpoints
-- **AI Model**: Local GPT-OSS model integration
-- **Deployment**: Running on remote machine, accessed via ngrok tunnel
-- **Use Case**: Shared AI server, remote GPU access, collaborative development
-
-#### **Option 1: External Flask Server (via ngrok)**
-- **API Layer**: Flask server with RESTful endpoints
-- **AI Model**: Local GPT-OSS model integration
-- **Deployment**: Running on remote machine, accessed via ngrok tunnel
-- **Use Case**: Shared AI server, remote GPU access, collaborative development
-
-#### **Option 1: External Flask Server (via ngrok)**
-- **API Layer**: Flask server with RESTful endpoints
-- **AI Model**: Local GPT-OSS model integration
-- **Deployment**: Running on remote machine, accessed via ngrok tunnel
-- **Use Case**: Shared AI server, remote GPU access, collaborative development
-
-#### **Option 1: External Flask Server (via ngrok)**
-- **API Layer**: Flask server with RESTful endpoints
-- **AI Model**: Local GPT-OSS model integration
-- **Deployment**: Running on remote machine, accessed via ngrok tunnel
-- **Use Case**: Shared AI server, remote GPU access, collaborative development
-
-#### **Option 2: External FastAPI Server**
+#### **Option 1: External FastAPI Server**
 - **API Layer**: FastAPI server with RESTful endpoints
 - **AI Model**: Local GPT-OSS model integration
-- **Deployment**: Separate server process on local machine
-- **Use Case**: Local development and high-performance scenarios
+- **Deployment**: Separate server process
+- **Use Case**: Development and high-performance scenarios
 
-#### **Option 3: Embedded Server (Mobile-Optimized)**
+#### **Option 2: Embedded Server (Mobile-Optimized)**
 - **Built-in API**: Express.js server embedded in the app
 - **Lightweight AI**: Embedded AI processing with local models
 - **Zero Configuration**: No external server required
 - **Offline-First**: Complete functionality without internet
 - **Mobile Deployment**: Packaged directly in the mobile app
-- **Use Case**: Emergency scenarios, complete offline operation
 
 ### **Embedded Server Architecture**
 
