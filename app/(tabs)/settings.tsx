@@ -33,27 +33,6 @@ export default function SettingsTab() {
     checkServerStatus();
   };
 
-
-  useEffect(() => {
-    checkServerStatus();
-  }, [serverUrl]);
-
-  const checkServerStatus = async () => {
-    setServerStatus('checking');
-    try {
-      await api.checkServerStatus();
-      setServerStatus('online');
-    } catch (error) {
-      setServerStatus('offline');
-    }
-  };
-
-  const handleServerUrlChange = (newUrl: string) => {
-    setServerUrl(newUrl);
-    api.updateBaseURL(newUrl);
-    checkServerStatus();
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
