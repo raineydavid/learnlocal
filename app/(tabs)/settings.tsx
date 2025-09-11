@@ -32,9 +32,7 @@ export default function SettingsTab() {
     api.updateBaseURL(newUrl);
     checkServerStatus();
   };
-  const [showServerConfig, setShowServerConfig] = useState(false);
-  const [serverUrl, setServerUrl] = useState('http://localhost:8000');
-  const [serverStatus, setServerStatus] = useState<'online' | 'offline' | 'checking'>('offline');
+
 
   useEffect(() => {
     checkServerStatus();
