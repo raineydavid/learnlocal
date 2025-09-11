@@ -1,8 +1,9 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Settings as SettingsIcon, Server, Globe, Bell, Shield, CircleHelp as HelpCircle, Download, Languages, Volume2, CreditCard as Edit3 } from 'lucide-react-native';
+import { Settings as SettingsIcon, Server, Globe, Bell, Shield, CircleHelp as HelpCircle, Download, Languages, Volume2, CreditCard as Edit3, Share2, Wifi, Bluetooth } from 'lucide-react-native';
 import { useState, useEffect } from 'react';
 import { router } from 'expo-router';
+import DeviceSharingModal from '@/components/DeviceSharingModal';
 import ServerConfigModal from '@/components/ServerConfigModal';
 import { api } from '@/services/api';
 import { offlineService } from '@/services/offlineService';
@@ -12,6 +13,7 @@ export default function SettingsTab() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [offlineMode, setOfflineMode] = useState(false);
   const [showServerConfig, setShowServerConfig] = useState(false);
+  const [showDeviceSharing, setShowDeviceSharing] = useState(false);
   const [serverUrl, setServerUrl] = useState('http://localhost:8000');
   const [serverStatus, setServerStatus] = useState<'online' | 'offline' | 'checking'>('offline');
   const [cacheSize, setCacheSize] = useState({ lessons: 0, chats: 0, totalMB: 0 });
@@ -130,6 +132,43 @@ export default function SettingsTab() {
         </View>
 
         <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Device Sharing</Text>
+          
+          <TouchableOpacity 
+            style={styles.settingItem}
+            onPress={() => setShowDeviceSharing(true)}
+          >
+            <View style={styles.settingLeft}>
+              <Share2 size={20} color="#3B82F6" />
+              <View style={styles.settingText}>
+                <Text style={styles.settingTitle}>Share Content</Text>
+                <Text style={styles.settingSubtitle}>Share lessons with nearby devices</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.settingItem}>
+            <View style={styles.settingLeft}>
+              <Wifi size={20} color="#3B82F6" />
+              <View style={styles.settingText}>
+                <Text style={styles.settingTitle}>WiFi Direct</Text>
+                <Text style={styles.settingSubtitle}>Direct device-to-device sharing</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.settingItem}>
+            <View style={styles.settingLeft}>
+              <Bluetooth size={20} color="#3B82F6" />
+              <View style={styles.settingText}>
+                <Text style={styles.settingTitle}>Bluetooth Sharing</Text>
+                <Text style={styles.settingSubtitle}>Low-power content distribution</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.section}>
           <Text style={styles.sectionTitle}>App Preferences</Text>
           
           <View style={styles.settingItem}>
@@ -239,6 +278,11 @@ export default function SettingsTab() {
           currentUrl={serverUrl}
           onSave={handleServerUrlChange}
           onClose={() => setShowServerConfig(false)}
+        />
+
+        <DeviceSharingModal
+          visible={showDeviceSharing}
+          onClose={() => setShowDeviceSharing(false)}
         />
       </ScrollView>
     </SafeAreaView>
