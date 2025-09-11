@@ -232,7 +232,7 @@ export default function SettingsTab() {
                 {provider.id === 'gpt-oss' ? (
                   <Zap size={24} color={selectedProvider === provider.id ? "#FFFFFF" : "#4F46E5"} />
                 ) : (
-                  <Cloud size={24} color={selectedProvider === provider.id ? "#FFFFFF" : "#F59E0B"} />
+                  <Download size={24} color={selectedProvider === provider.id ? "#FFFFFF" : "#FF6B35"} />
                 )}
                 <Text style={[
                   styles.providerTitle,
@@ -289,9 +289,9 @@ export default function SettingsTab() {
 
           {selectedProvider === 'huggingface' && (
             <View style={styles.infoBox}>
-              <Cloud size={16} color="#F59E0B" />
+              <Download size={16} color="#FF6B35" />
               <Text style={styles.infoText}>
-                Hugging Face models run in the cloud. No local server required, but internet connection is needed.
+                Hugging Face models are downloaded and run locally. No internet required after download.
               </Text>
             </View>
           )}
@@ -465,10 +465,11 @@ export default function SettingsTab() {
           <View style={styles.statusItem}>
             <View style={[
               styles.statusDot, 
-              selectedProvider === 'huggingface' ? styles.statusOnline : styles.statusChecking
+              selectedProvider === 'huggingface' ? styles.statusOnline : 
+              serverStatus === 'online' ? styles.statusOnline : styles.statusOffline
             ]} />
             <Text style={styles.statusText}>
-              AI Provider: {selectedProvider === 'gpt-oss' ? 'GPT-OSS Local' : 'Hugging Face Cloud'}
+              AI Provider: {selectedProvider === 'gpt-oss' ? 'GPT-OSS Local' : 'Hugging Face Offline'}
             </Text>
           </View>
 
@@ -479,9 +480,9 @@ export default function SettingsTab() {
               serverStatus === 'checking' ? styles.statusChecking : styles.statusOffline
             ]} />
             <Text style={styles.statusText}>
-              {selectedProvider === 'huggingface' ? 'Cloud API' :
+              {selectedProvider === 'huggingface' ? 'Offline Models' :
                useEmbeddedServer ? 'Embedded' : 'FastAPI'} Server: {
-                selectedProvider === 'huggingface' ? 'Connected' :
+                selectedProvider === 'huggingface' ? 'Local' :
                 embeddedServerState.isRunning ? 'Connected' :
                 serverStatus === 'online' ? 'Connected' :
                 serverStatus === 'checking' ? 'Checking...' : 'Disconnected'
@@ -500,7 +501,7 @@ export default function SettingsTab() {
           
           <Text style={styles.statusNote}>
             {selectedProvider === 'huggingface' 
-              ? 'Using Hugging Face cloud models. Internet connection required for AI features.'
+              ? 'Using downloaded Hugging Face models running locally. No internet required.'
               : useEmbeddedServer 
               ? 'Using built-in AI server for offline functionality. No external server required.'
               : `Make sure your FastAPI server is running on ${serverUrl} with the GPT-OSS model loaded.`

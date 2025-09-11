@@ -79,8 +79,18 @@ export default function ModelDownloadScreen({ onComplete }: ModelDownloadScreenP
           <View style={styles.modelInfo}>
             <Text style={styles.modelName}>{model.name}</Text>
             <Text style={styles.modelVersion}>v{model.version}</Text>
-            {model.isRequired && (
-              <Text style={styles.requiredBadge}>Required</Text>
+            <View style={styles.modelBadges}>
+              <Text style={[styles.sourceBadge, { backgroundColor: getSourceColor(model.source) }]}>
+                {model.source.toUpperCase()}
+              </Text>
+              {model.isRequired && (
+                <Text style={styles.requiredBadge}>Required</Text>
+              )}
+            </View>
+            {model.capabilities && (
+              <Text style={styles.capabilities}>
+                {model.capabilities.join(', ')}
+              </Text>
             )}
           </View>
           <View style={styles.modelStatus}>
@@ -129,6 +139,14 @@ export default function ModelDownloadScreen({ onComplete }: ModelDownloadScreenP
     );
   };
 
+  const getSourceColor = (source: string) => {
+    switch (source) {
+      case 'gpt-oss': return '#4F46E5';
+      case 'huggingface': return '#FF6B35';
+      case 'local': return '#10B981';
+      default: return '#6B7280';
+    }
+  };
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -237,7 +255,21 @@ const styles = StyleSheet.create({
   modelVersion: {
     fontSize: 14,
     color: '#94A3B8',
+    marginBottom: 4,
+  },
+  modelBadges: {
+    flexDirection: 'row',
+    gap: 8,
     marginBottom: 8,
+  },
+  sourceBadge: {
+    fontSize: 10,
+    color: '#FFFFFF',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+    fontWeight: '600',
+    textTransform: 'uppercase',
   },
   requiredBadge: {
     fontSize: 12,
@@ -246,8 +278,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 12,
-    alignSelf: 'flex-start',
     fontWeight: '600',
+  },
+  capabilities: {
+    fontSize: 12,
+    color: '#64748B',
+    fontStyle: 'italic',
+    marginBottom: 8,
   },
   modelStatus: {
     marginLeft: 16,

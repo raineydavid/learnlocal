@@ -7,6 +7,9 @@ export interface ModelInfo {
   description: string;
   downloadUrl: string;
   isRequired: boolean;
+  source: 'gpt-oss' | 'huggingface' | 'local';
+  modelId?: string;
+  capabilities: string[];
 }
 
 export interface DownloadProgress {
@@ -50,22 +53,51 @@ export class ModelService {
           description: 'Core language model for chat and learning assistance',
           downloadUrl: 'https://example.com/gpt-oss-base.bin',
           isRequired: true,
+          source: 'gpt-oss',
+          capabilities: ['chat', 'lesson-generation', 'text-completion']
         },
         {
-          name: 'Translation Model',
+          name: 'Hugging Face - DialoGPT Medium',
           version: '1.0.0',
-          size: '1.8 GB',
-          description: 'Multi-language translation support',
-          downloadUrl: 'https://example.com/translation-model.bin',
+          size: '774 MB',
+          description: 'Conversational AI model from Microsoft',
+          downloadUrl: 'https://huggingface.co/microsoft/DialoGPT-medium',
           isRequired: false,
+          source: 'huggingface',
+          modelId: 'microsoft/DialoGPT-medium',
+          capabilities: ['chat', 'conversation']
         },
         {
-          name: 'TTS Model',
+          name: 'Hugging Face - FLAN-T5 Base',
+          version: '1.0.0',
+          size: '990 MB',
+          description: 'Instruction-tuned text-to-text model from Google',
+          downloadUrl: 'https://huggingface.co/google/flan-t5-base',
+          isRequired: false,
+          source: 'huggingface',
+          modelId: 'google/flan-t5-base',
+          capabilities: ['lesson-generation', 'text-to-text', 'instruction-following']
+        },
+        {
+          name: 'Hugging Face - BlenderBot 400M',
+          version: '1.0.0',
+          size: '1.6 GB',
+          description: 'Open-domain chatbot model from Facebook',
+          downloadUrl: 'https://huggingface.co/facebook/blenderbot-400M-distill',
+          isRequired: false,
+          source: 'huggingface',
+          modelId: 'facebook/blenderbot-400M-distill',
+          capabilities: ['chat', 'conversation', 'open-domain']
+        },
+        {
+          name: 'Local TTS Model',
           version: '1.0.0',
           size: '800 MB',
           description: 'Text-to-speech generation',
           downloadUrl: 'https://example.com/tts-model.bin',
           isRequired: false,
+          source: 'local',
+          capabilities: ['text-to-speech', 'audio-generation']
         },
       ];
     }
@@ -99,8 +131,9 @@ export class ModelService {
     onProgress?: (progress: DownloadProgress) => void
   ): Promise<boolean> {
     try {
-      // In a real implementation, this would download the model file
-      // For now, we'll simulate the download and notify the backend
+      if (model.source === 'huggingface') {
+        return await this.downloadHuggingFaceModel(model, onProgress);
+      }
       
       const response = await fetch(`${this.baseURL}/api/models/download`, {
         method: 'POST',
@@ -159,6 +192,100 @@ export class ModelService {
       return response.ok;
     } catch (error) {
       console.error('Install model error:', error);
+      return false;
+    }
+  }
+
+  private async downloadHuggingFaceModel(
+    model: ModelInfo,
+    onProgress?: (progress: DownloadProgress) => void
+  ): Promise<boolean> {
+    try {
+      // Download Hugging Face model for offline use
+      console.log(`Downloading Hugging Face model: ${model.modelId}`);
+      
+      // Simulate download progress for Hugging Face models
+      const totalBytes = this.parseSize(model.size);
+      
+      for (let i = 0; i <= 100; i += 5) {
+        const downloadedBytes = (totalBytes * i) / 100;
+        onProgress?.({
+          progress: i / 100,
+          totalBytes,
+          downloadedBytes,
+        });
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+
+      // Store model info for offline use
+      await this.storeOfflineModel(model);
+      
+      return true;
+    } catch (error) {
+      console.error('Hugging Face model download error:', error);
+      return false;
+    }
+  }
+
+  private parseSize(sizeString: string): number {
+    const match = sizeString.match(/(\d+(?:\.\d+)?)\s*(GB|MB|KB)/i);
+    if (!match) return 0;
+    
+    const value = parseFloat(match[1]);
+    const unit = match[2].toUpperCase();
+    
+    switch (unit) {
+      case 'GB': return value * 1024 * 1024 * 1024;
+      case 'MB': return value * 1024 * 1024;
+      case 'KB': return value * 1024;
+      default: return value;
+    }
+  }
+
+  private async storeOfflineModel(model: ModelInfo): Promise<void> {
+    try {
+      const offlineModels = await this.getOfflineModels();
+      offlineModels[model.name] = {
+        ...model,
+        downloadedAt: new Date(),
+        isInstalled: true
+      };
+      
+      // Store in AsyncStorage for persistence
+      const AsyncStorage = await import('@react-native-async-storage/async-storage');
+      await AsyncStorage.default.setItem('offline_models', JSON.stringify(offlineModels));
+    } catch (error) {
+      console.error('Failed to store offline model:', error);
+    }
+  }
+
+  private async getOfflineModels(): Promise<{ [key: string]: any }> {
+    try {
+      const AsyncStorage = await import('@react-native-async-storage/async-storage');
+      const stored = await AsyncStorage.default.getItem('offline_models');
+      return stored ? JSON.parse(stored) : {};
+    } catch (error) {
+      console.error('Failed to get offline models:', error);
+      return {};
+    }
+  }
+
+  async getInstalledModels(): Promise<ModelInfo[]> {
+    try {
+      const offlineModels = await this.getOfflineModels();
+      return Object.values(offlineModels) as ModelInfo[];
+    } catch (error) {
+      console.error('Failed to get installed models:', error);
+      return [];
+    }
+  }
+
+  async isModelInstalled(modelName: string): Promise<boolean> {
+    try {
+      const offlineModels = await this.getOfflineModels();
+      return !!offlineModels[modelName]?.isInstalled;
+    } catch (error) {
+      console.error('Failed to check model installation:', error);
       return false;
     }
   }

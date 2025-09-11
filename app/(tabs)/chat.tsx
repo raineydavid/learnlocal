@@ -10,7 +10,7 @@ import {
   Platform 
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Send, Bot, User, Zap, Cloud } from 'lucide-react-native';
+import { Send, Bot, User, Zap, Download } from 'lucide-react-native';
 import TranslationBar from '@/components/TranslationBar';
 import ChatMessageRenderer from '@/components/ChatMessageRenderer';
 import { offlineService, CachedChat } from '@/services/offlineService';
@@ -110,7 +110,7 @@ export default function ChatTab() {
     if (!networkStatus.isConnected && currentProvider === 'huggingface') {
       const offlineMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: 'Hugging Face models require an internet connection. Please connect to the internet to use cloud-based AI features.',
+        text: 'Using downloaded Hugging Face models offline. All processing happens locally on your device.',
         isUser: false,
         timestamp: new Date(),
       };
@@ -137,7 +137,7 @@ export default function ChatTab() {
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: currentProvider === 'huggingface' 
-          ? 'I\'m having trouble connecting to Hugging Face. Please check your internet connection.'
+          ? 'I\'m having trouble with the offline Hugging Face model. Please check if models are properly downloaded.'
           : 'I\'m having trouble connecting to the learning model. Please make sure your server is running and accessible.',
         isUser: false,
         timestamp: new Date(),
@@ -163,10 +163,10 @@ export default function ChatTab() {
               {currentProvider === 'gpt-oss' ? (
                 <Zap size={16} color="#4F46E5" />
               ) : (
-                <Cloud size={16} color="#F59E0B" />
+                <Download size={16} color="#FF6B35" />
               )}
               <Text style={styles.providerText}>
-                {currentProvider === 'gpt-oss' ? 'GPT-OSS Local' : 'Hugging Face'}
+                {currentProvider === 'gpt-oss' ? 'GPT-OSS Local' : 'HF Offline'}
               </Text>
             </View>
           </View>

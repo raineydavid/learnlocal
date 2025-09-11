@@ -98,6 +98,11 @@ export class LearnLocalAPI {
   setProvider(provider: 'gpt-oss' | 'huggingface') {
     this.selectedProvider = provider;
     this.saveProvider(provider);
+    
+    // If switching to offline mode, use offline AI
+    if (provider === 'huggingface-offline') {
+      this.selectedProvider = 'gpt-oss'; // Use offline processing
+    }
   }
 
   private async saveProvider(provider: 'gpt-oss' | 'huggingface') {
@@ -122,8 +127,8 @@ export class LearnLocalAPI {
       },
       {
         id: 'huggingface',
-        name: 'Hugging Face',
-        description: 'Cloud-based models from Hugging Face Hub',
+        name: 'Hugging Face Models (Offline)',
+        description: 'Downloaded Hugging Face models running locally',
         available: true
       }
     ];
@@ -133,11 +138,12 @@ export class LearnLocalAPI {
     try {
       // Route to appropriate provider
       if (this.selectedProvider === 'huggingface') {
-        const { huggingFaceService } = await import('./huggingFaceService');
-        const response = await huggingFaceService.chatCompletion(request.message);
+        // Use offline AI with downloaded Hugging Face models
+        const { offlineAI } = await import('./offlineAI');
+        const response = await offlineAI.processChat(request.message);
         return {
           response,
-          model: 'huggingface',
+          model: 'huggingface-offline',
           timestamp: new Date().toISOString()
         };
       }
@@ -302,7 +308,8 @@ export class LearnLocalAPI {
     try {
       // Route to appropriate provider
       if (this.selectedProvider === 'huggingface') {
-        const { huggingFaceService } = await import('./huggingFaceService');
+        // Use offline AI with downloaded Hugging Face models
+        const { offlineAI } = await import('./offlineAI');
         
         // Extract lesson parameters from messages
         const userMessage = request.conversation.messages.find(m => m.role === 'user')?.content || '';
@@ -316,12 +323,17 @@ export class LearnLocalAPI {
         const difficulty = difficultyMatch?.[1]?.toLowerCase() || 'beginner';
         const category = categoryMatch?.[1]?.toLowerCase().replace(/\s+/g, '-') || 'general';
         
-        const lesson = await huggingFaceService.generateLesson(topic, difficulty, category);
+        const lesson = await offlineAI.generateLesson({
+          topic,
+          difficulty,
+          category,
+          duration: 15
+        });
         
         return {
           content: JSON.stringify(lesson),
           tokens: 0,
-          model: 'huggingface'
+          model: 'huggingface-offline'
         };
       }
 

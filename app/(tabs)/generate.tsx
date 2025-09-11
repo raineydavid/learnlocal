@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
-import { Sparkles, BookOpen, Clock, Target, Zap, Cloud } from 'lucide-react-native';
+import { Sparkles, BookOpen, Clock, Target, Zap, Download } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { harmonyLessonService, LessonRequest, GeneratedLesson } from '@/services/harmonyService';
 import { api } from '@/services/api';
@@ -36,10 +36,10 @@ export default function GenerateTab() {
     },
     { 
       id: 'huggingface' as const, 
-      title: 'Hugging Face', 
-      description: 'Cloud-based AI models',
-      icon: Cloud,
-      color: '#F59E0B'
+      title: 'Hugging Face Models', 
+      description: 'Downloaded models running offline',
+      icon: Download,
+      color: '#FF6B35'
     },
   ];
 
