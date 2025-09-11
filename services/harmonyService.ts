@@ -135,7 +135,14 @@ Make the lesson engaging, interactive, and age-appropriate. Include real-world e
       try {
         // Handle different response formats
         const content = data.response || data.content || data.message || '';
-        lessonData = JSON.parse(content);
+        
+        // Try to extract JSON from the response
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          lessonData = JSON.parse(jsonMatch[0]);
+        } else {
+          lessonData = JSON.parse(content);
+        }
       } catch (parseError) {
         // Fallback if the model doesn't return valid JSON
         const content = data.response || data.content || data.message || 'Generated lesson content';

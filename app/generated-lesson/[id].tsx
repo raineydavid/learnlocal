@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { GeneratedLesson } from '@/services/harmonyService';
 import TranslationBar from '@/components/TranslationBar';
 import LessonPlayer from '@/components/LessonPlayer';
+import LessonContentRenderer from '@/components/LessonContentRenderer';
 
 export default function GeneratedLessonScreen() {
   const { id, lessonData } = useLocalSearchParams();
@@ -96,9 +97,10 @@ export default function GeneratedLessonScreen() {
             title={lesson.title}
           />
           
-          <Text style={styles.contentText}>
-            {translatedContent || lesson.content}
-          </Text>
+          <LessonContentRenderer 
+            jsonContent={translatedContent || lesson.content}
+            fallbackContent={lesson.content}
+          />
 
           {lesson.keyPoints.length > 0 && (
             <View style={styles.section}>

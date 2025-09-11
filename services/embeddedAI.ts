@@ -246,6 +246,25 @@ export class EmbeddedAI {
   private generateLessonContent(topic: string, difficulty: string, category: string): string {
     const knowledge = this.knowledgeBase.get(category) || this.knowledgeBase.get('general');
     
+    // Return structured JSON content for better parsing
+    const lessonContent = {
+      title: `${difficulty === 'beginner' ? 'Introduction to' : difficulty === 'intermediate' ? 'Understanding' : 'Advanced'} ${topic}`,
+      content: this.generateMarkdownContent(topic, difficulty, category),
+      keyPoints: this.generateKeyPoints(topic, category),
+      activities: this.generateLessonActivities(topic, difficulty),
+      estimatedDuration: 15,
+      objectives: [
+        `Understand the basic concepts of ${topic}`,
+        `Apply ${topic} knowledge to real-world situations`,
+        `Demonstrate comprehension through activities`
+      ],
+      summary: `This lesson provides a comprehensive ${difficulty}-level introduction to ${topic}, covering key concepts, practical applications, and engaging activities to reinforce learning.`
+    };
+    
+    return JSON.stringify(lessonContent, null, 2);
+  }
+
+  private generateMarkdownContent(topic: string, difficulty: string, category: string): string {
     let content = `# ${topic}\n\n`;
     
     if (difficulty === 'beginner') {

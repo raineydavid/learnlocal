@@ -12,8 +12,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Send, Bot, User } from 'lucide-react-native';
 import TranslationBar from '@/components/TranslationBar';
+import ChatMessageRenderer from '@/components/ChatMessageRenderer';
 import { offlineService, CachedChat } from '@/services/offlineService';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import { useEffect } from 'react';
 
 interface Message {
   id: string;
@@ -172,56 +174,28 @@ export default function ChatTab() {
           showsVerticalScrollIndicator={false}
         >
           {messages.map((message) => (
-            <View
+            <ChatMessageRenderer
               key={message.id}
-              style={[
-                styles.messageContainer,
-                message.isUser ? styles.userMessage : styles.aiMessage,
-              ]}
-            >
-              <View style={styles.messageHeader}>
-                {message.isUser ? (
-                  <User size={16} color="#FFFFFF" />
-                ) : (
-                  <Bot size={16} color="#3B82F6" />
-                )}
-                <Text style={[
-                  styles.messageLabel,
-                  message.isUser ? styles.userLabel : styles.aiLabel,
-                ]}>
-                  {message.isUser ? 'You' : 'AI Assistant'}
-                </Text>
-              </View>
-              <Text style={[
-                styles.messageText,
-                message.isUser ? styles.userText : styles.aiText,
-              ]}>
-                {message.text}
-              </Text>
-              {!message.isUser && (
-                <TranslationBar
-                  text={message.text}
-                  onTranslate={(translatedText) => {
-                    // Update the message with translated text
-                    setMessages(prev => prev.map(msg => 
-                      msg.id === message.id 
-                        ? { ...msg, text: translatedText }
-                        : msg
-                    ));
-                  }}
-                />
-              )}
-            </View>
+              message={message}
+              onTranslate={(translatedText) => {
+                setMessages(prev => prev.map(msg => 
+                  msg.id === message.id 
+                    ? { ...msg, text: translatedText }
+                    : msg
+                ));
+              }}
+            />
           ))}
           
           {isLoading && (
-            <View style={[styles.messageContainer, styles.aiMessage]}>
-              <View style={styles.messageHeader}>
-                <Bot size={16} color="#3B82F6" />
-                <Text style={styles.aiLabel}>AI Assistant</Text>
-              </View>
-              <Text style={styles.loadingText}>Thinking...</Text>
-            </View>
+            <ChatMessageRenderer
+              message={{
+                id: 'loading',
+                text: 'Thinking...',
+                isUser: false,
+                timestamp: new Date(),
+              }}
+            />
           )}
         </ScrollView>
 
@@ -276,65 +250,6 @@ const styles = StyleSheet.create({
   messagesContainer: {
     flex: 1,
     padding: 16,
-  },
-  messageContainer: {
-    marginBottom: 16,
-    maxWidth: '85%',
-  },
-  userMessage: {
-    alignSelf: 'flex-end',
-  },
-  aiMessage: {
-    alignSelf: 'flex-start',
-  },
-  messageHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 6,
-    gap: 6,
-  },
-  messageLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  userLabel: {
-    color: '#FFFFFF',
-  },
-  aiLabel: {
-    color: '#4F46E5',
-  },
-  messageText: {
-    fontSize: 16,
-    lineHeight: 22,
-    padding: 12,
-    borderRadius: 16,
-  },
-  userText: {
-    backgroundColor: '#4F46E5',
-    color: '#FFFFFF',
-    borderBottomRightRadius: 4,
-  },
-  aiText: {
-    backgroundColor: '#334155',
-    color: '#FFFFFF',
-    borderBottomLeftRadius: 4,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  loadingText: {
-    fontSize: 16,
-    color: '#94A3B8',
-    fontStyle: 'italic',
-    padding: 12,
-    backgroundColor: '#334155',
-    borderRadius: 16,
-    borderBottomLeftRadius: 4,
   },
   inputContainer: {
     flexDirection: 'row',
