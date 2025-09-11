@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -18,7 +18,6 @@ import { offlineService, CachedChat } from '@/services/offlineService';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { useEmbeddedServer } from '@/hooks/useEmbeddedServer';
 import { api } from '@/services/api';
-import { useEffect } from 'react';
 
 interface Message {
   id: string;
@@ -43,10 +42,16 @@ export default function ChatTab() {
   const embeddedServer = useEmbeddedServer();
   const [chatId] = useState(`chat-${Date.now()}`);
   const [serverError, setServerError] = useState<string | null>(null);
+  const isMountedRef = useRef(true);
 
   // Load cached messages on component mount
   useEffect(() => {
     loadCachedMessages();
+    
+    // Cleanup function to mark component as unmounted
+    return () => {
+      isMountedRef.current = false;
+    };
   }, []);
 
   // Save messages to cache whenever messages change
@@ -59,9 +64,9 @@ export default function ChatTab() {
   const loadCachedMessages = async () => {
     try {
       const cachedChats = await offlineService.getCachedChats();
-      if (cachedChats.length > 0) {
+      if (cachedChats && cachedChats.length > 0 && isMountedRef.current) {
         const lastChat = cachedChats[0];
-        setMessages(lastChat.messages);
+        setMessages(lastChat.messages || []);
       }
     } catch (error) {
       console.error('Failed to load cached messages:', error);
@@ -91,10 +96,15 @@ export default function ChatTab() {
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    if (isMountedRef.current) {
+      setMessages(prev => [...prev, userMessage]);
+    }
     setInputText('');
-    setIsLoading(true);
-    setServerError(null);
+    
+    if (isMountedRef.current) {
+      setIsLoading(true);
+      setServerError(null);
+    }
 
     // Scroll to bottom immediately after user message
     setTimeout(() => {
@@ -143,7 +153,9 @@ export default function ChatTab() {
         timestamp: new Date(),
       };
       
-      setMessages(prev => [...prev, aiMessage]);
+      if (isMountedRef.current) {
+        setMessages(prev => [...prev, aiMessage]);
+      }
       
     } catch (error) {
       console.error('Chat error:', error);
@@ -165,10 +177,14 @@ export default function ChatTab() {
         timestamp: new Date(),
       };
       
-      setMessages(prev => [...prev, offlineMessage]);
-      setServerError(error instanceof Error ? error.message : 'Unknown error');
+      if (isMountedRef.current) {
+        setMessages(prev => [...prev, offlineMessage]);
+        setServerError(error instanceof Error ? error.message : 'Unknown error');
+      }
     } finally {
-      setIsLoading(false);
+      if (isMountedRef.current) {
+        setIsLoading(false);
+      }
     }
 
     // Scroll to bottom
@@ -234,16 +250,18 @@ export default function ChatTab() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.messagesContent}
         >
-          {messages.map((message) => (
+          {messages && messages.map((message) => (
             <ChatMessageRenderer
               key={message.id}
               message={message}
               onTranslate={(translatedText) => {
-                setMessages(prev => prev.map(msg => 
-                  msg.id === message.id 
-                    ? { ...msg, text: translatedText }
-                    : msg
-                ));
+                if (isMountedRef.current) {
+                  setMessages(prev => prev.map(msg => 
+                    msg.id === message.id 
+                      ? { ...msg, text: translatedText }
+                      : msg
+                  ));
+                }
               }}
             />
           ))}
@@ -282,15 +300,6 @@ export default function ChatTab() {
               {inputText.length}/500
             </Text>
           </View>
-          <TextInput
-            style={styles.textInput}
-            value={inputText}
-            onChangeText={setInputText}
-            placeholder="Ask me anything about your learning..."
-            placeholderTextColor="#9CA3AF"
-            multiline
-            maxLength={500}
-          />
           <TouchableOpacity
             style={[styles.sendButton, inputText.trim() ? styles.sendButtonActive : {}]}
             onPress={sendMessage}
