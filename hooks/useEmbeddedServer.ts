@@ -1,85 +1,117 @@
-import { useState, useEffect } from 'react';
-import { embeddedServer } from '@/services/embeddedServer';
-import { api } from '@/services/api';
+import { useState, useEffect, useCallback } from 'react';
+import { Platform } from 'react-native';
+
+export interface EmbeddedServerStatus {
+  isRunning: boolean;
+  url: string;
+  port: number;
+  error?: string;
+}
 
 export function useEmbeddedServer() {
-  const [isServerRunning, setIsServerRunning] = useState(false);
-  const [serverUrl, setServerUrl] = useState('');
-  const [isStarting, setIsStarting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<EmbeddedServerStatus>({
+    isRunning: false,
+    url: '',
+    port: 8080,
+  });
 
-  useEffect(() => {
-    checkServerStatus();
-  }, []);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const checkServerStatus = () => {
-    const running = embeddedServer.isServerRunning();
-    setIsServerRunning(running);
-    if (running) {
-      setServerUrl(embeddedServer.getServerUrl());
-    }
-  };
-
-  const startServer = async (): Promise<boolean> => {
-    if (isServerRunning) {
-      return true;
+  const startServer = useCallback(async () => {
+    if (Platform.OS === 'web') {
+      // On web, we can't run an embedded server
+      setStatus({
+        isRunning: false,
+        url: '',
+        port: 8080,
+        error: 'Embedded server not available on web platform'
+      });
+      return false;
     }
 
-    setIsStarting(true);
-    setError(null);
-
+    setIsLoading(true);
     try {
+      // Import the embedded server only on native platforms
+      const { embeddedServer } = await import('../services/embeddedServer');
       const success = await embeddedServer.start();
+      
       if (success) {
-        const url = embeddedServer.getServerUrl();
-        setServerUrl(url);
-        setIsServerRunning(true);
-        
-        // Update API service to use embedded server
-        api.updateBaseURL(url);
-        
-        return true;
+        setStatus({
+          isRunning: true,
+          url: embeddedServer.getServerUrl(),
+          port: 8080,
+        });
       } else {
-        setError('Failed to start embedded server');
-        return false;
+        setStatus({
+          isRunning: false,
+          url: '',
+          port: 8080,
+          error: 'Failed to start embedded server'
+        });
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      setError(errorMessage);
+      
+      return success;
+    } catch (error) {
+      setStatus({
+        isRunning: false,
+        url: '',
+        port: 8080,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
       return false;
     } finally {
-      setIsStarting(false);
+      setIsLoading(false);
     }
-  };
+  }, []);
 
-  const stopServer = async (): Promise<void> => {
-    if (!isServerRunning) {
+  const stopServer = useCallback(async () => {
+    if (Platform.OS === 'web') {
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { embeddedServer } = await import('../services/embeddedServer');
+      await embeddedServer.stop();
+      setStatus({
+        isRunning: false,
+        url: '',
+        port: 8080,
+      });
+    } catch (error) {
+      console.error('Error stopping server:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const checkServerStatus = useCallback(async () => {
+    if (Platform.OS === 'web') {
       return;
     }
 
     try {
-      await embeddedServer.stop();
-      setIsServerRunning(false);
-      setServerUrl('');
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      setError(errorMessage);
+      const { embeddedServer } = await import('../services/embeddedServer');
+      const isRunning = embeddedServer.isServerRunning();
+      setStatus(prev => ({
+        ...prev,
+        isRunning,
+        url: isRunning ? embeddedServer.getServerUrl() : '',
+      }));
+    } catch (error) {
+      console.error('Error checking server status:', error);
     }
-  };
+  }, []);
 
-  const restartServer = async (): Promise<boolean> => {
-    await stopServer();
-    return await startServer();
-  };
+  useEffect(() => {
+    checkServerStatus();
+  }, [checkServerStatus]);
 
   return {
-    isServerRunning,
-    serverUrl,
-    isStarting,
-    error,
+    status,
+    isLoading,
     startServer,
     stopServer,
-    restartServer,
-    checkServerStatus
+    checkServerStatus,
   };
 }
