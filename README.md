@@ -284,6 +284,24 @@ const communityProgress = {
 - **Deployment**: Running on remote machine, accessed via ngrok tunnel
 - **Use Case**: Shared AI server, remote GPU access, collaborative development
 
+#### **Option 1: External Flask Server (via ngrok)**
+- **API Layer**: Flask server with RESTful endpoints
+- **AI Model**: Local GPT-OSS model integration
+- **Deployment**: Running on remote machine, accessed via ngrok tunnel
+- **Use Case**: Shared AI server, remote GPU access, collaborative development
+
+#### **Option 1: External Flask Server (via ngrok)**
+- **API Layer**: Flask server with RESTful endpoints
+- **AI Model**: Local GPT-OSS model integration
+- **Deployment**: Running on remote machine, accessed via ngrok tunnel
+- **Use Case**: Shared AI server, remote GPU access, collaborative development
+
+#### **Option 1: External Flask Server (via ngrok)**
+- **API Layer**: Flask server with RESTful endpoints
+- **AI Model**: Local GPT-OSS model integration
+- **Deployment**: Running on remote machine, accessed via ngrok tunnel
+- **Use Case**: Shared AI server, remote GPU access, collaborative development
+
 #### **Option 2: External FastAPI Server**
 - **API Layer**: FastAPI server with RESTful endpoints
 - **AI Model**: Local GPT-OSS model integration
@@ -292,6 +310,26 @@ const communityProgress = {
 
 #### **Option 3: Embedded Server (Mobile-Optimized)**
 - **Built-in API**: Express.js server embedded in the app
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=[
+#         "http://localhost:8081",
+#         "https://localhost:8081", 
+#         "exp://localhost:8081",
+#         "https://bibliographical-flaggingly-bailee.ngrok-free.app"
+#     ],
+#     allow_credentials=True,
+#     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+#     allow_headers=[
+#         "Content-Type", 
+#         "Authorization", 
+#         "Accept", 
+#         "Access-Control-Allow-Origin",
+#         "Origin",
+#         "X-Requested-With",
+#         "ngrok-skip-browser-warning"
+#     ],
+# )
 - **Lightweight AI**: Embedded AI processing with local models
 - **Zero Configuration**: No external server required
 - **Offline-First**: Complete functionality without internet
