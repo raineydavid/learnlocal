@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Settings as SettingsIcon, Server, Globe, Bell, Shield, CircleHelp as HelpCircle, Download, Languages, Volume2, Edit3 } from 'lucide-react-native';
+import { Settings as SettingsIcon, Server, Globe, Bell, Shield, CircleHelp as HelpCircle, Download, Languages, Volume2, CreditCard as Edit3 } from 'lucide-react-native';
 import { useState, useEffect } from 'react';
 import { router } from 'expo-router';
 import ServerConfigModal from '@/components/ServerConfigModal';
