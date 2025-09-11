@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { BookOpen, Target, Clock, CheckCircle, Play } from 'lucide-react-native';
+import { BookOpen, Target, Clock, CircleCheck as CheckCircle, Play } from 'lucide-react-native';
 
 interface LessonContent {
   title?: string;
