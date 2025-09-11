@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { offlineService, CachedLesson } from './offlineService';
 import { api } from './api';
 
@@ -37,12 +38,26 @@ export class HarmonyLessonService {
 
   constructor(baseURL: string = 'http://localhost:8000') {
     this.baseURL = baseURL;
+    this.loadSavedSettings();
+  }
+
+  private async loadSavedSettings() {
+    try {
+      const savedUrl = await AsyncStorage.getItem('server_url');
+      if (savedUrl) {
+        this.baseURL = savedUrl;
+        console.log(`Harmony service loaded saved URL: ${savedUrl}`);
+      }
+    } catch (error) {
+      console.error('Failed to load saved harmony settings:', error);
+    }
   }
 
   updateBaseURL(newBaseURL: string) {
     this.baseURL = newBaseURL;
     // Update the API service URL as well
     api.updateBaseURL(newBaseURL);
+    console.log(`Harmony service updated to use: ${newBaseURL}`);
   }
 
   private createLessonPrompt(request: LessonRequest): HarmonyConversation {

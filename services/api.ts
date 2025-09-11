@@ -1,3 +1,5 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 export interface ChatRequest {
   message: string;
   model: string;
@@ -53,11 +55,40 @@ export class LearnLocalAPI {
 
   constructor(baseURL: string = 'http://localhost:8000') {
     this.baseURL = baseURL;
+    this.loadSavedSettings();
+  }
+
+  private async loadSavedSettings() {
+    try {
+      const savedUrl = await AsyncStorage.getItem('server_url');
+      const savedProvider = await AsyncStorage.getItem('selected_provider');
+      
+      if (savedUrl) {
+        this.baseURL = savedUrl;
+        console.log(`API service loaded saved URL: ${savedUrl}`);
+      }
+      
+      if (savedProvider) {
+        this.selectedProvider = savedProvider as 'gpt-oss' | 'huggingface';
+        console.log(`API service loaded saved provider: ${savedProvider}`);
+      }
+    } catch (error) {
+      console.error('Failed to load saved API settings:', error);
+    }
   }
 
   updateBaseURL(newBaseURL: string) {
     this.baseURL = newBaseURL;
     console.log(`API service updated to use: ${newBaseURL}`);
+    this.saveBaseURL(newBaseURL);
+  }
+
+  private async saveBaseURL(url: string) {
+    try {
+      await AsyncStorage.setItem('server_url', url);
+    } catch (error) {
+      console.error('Failed to save API base URL:', error);
+    }
   }
 
   getBaseURL(): string {
@@ -66,6 +97,15 @@ export class LearnLocalAPI {
 
   setProvider(provider: 'gpt-oss' | 'huggingface') {
     this.selectedProvider = provider;
+    this.saveProvider(provider);
+  }
+
+  private async saveProvider(provider: 'gpt-oss' | 'huggingface') {
+    try {
+      await AsyncStorage.setItem('selected_provider', provider);
+    } catch (error) {
+      console.error('Failed to save API provider:', error);
+    }
   }
 
   getProvider(): 'gpt-oss' | 'huggingface' {

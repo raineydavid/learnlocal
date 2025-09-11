@@ -3,6 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Settings as SettingsIcon, Server, Globe, Bell, Shield, CircleHelp as HelpCircle, Download, Languages, Volume2, CreditCard as Edit3, Share2, Wifi, Bluetooth, Zap, Cloud } from 'lucide-react-native';
 import { useState, useEffect } from 'react';
 import { router } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import DeviceSharingModal from '@/components/DeviceSharingModal';
 import ServerConfigModal from '@/components/ServerConfigModal';
 import { api, ModelProvider } from '@/services/api';
@@ -31,10 +32,37 @@ export default function SettingsTab() {
   });
 
   useEffect(() => {
+    loadSavedSettings();
     checkServerStatus();
     loadCacheInfo();
     loadAvailableProviders();
   }, [serverUrl]);
+
+  const loadSavedSettings = async () => {
+    try {
+      const savedUrl = await AsyncStorage.getItem('server_url');
+      const savedProvider = await AsyncStorage.getItem('selected_provider');
+      const savedEmbeddedServer = await AsyncStorage.getItem('use_embedded_server');
+      
+      if (savedUrl) {
+        setServerUrl(savedUrl);
+        api.updateBaseURL(savedUrl);
+        harmonyLessonService.updateBaseURL(savedUrl);
+      }
+      
+      if (savedProvider) {
+        const provider = savedProvider as 'gpt-oss' | 'huggingface';
+        setSelectedProvider(provider);
+        api.setProvider(provider);
+      }
+      
+      if (savedEmbeddedServer) {
+        setUseEmbeddedServer(savedEmbeddedServer === 'true');
+      }
+    } catch (error) {
+      console.error('Failed to load saved settings:', error);
+    }
+  };
 
   const loadAvailableProviders = async () => {
     try {
@@ -76,6 +104,7 @@ export default function SettingsTab() {
   };
 
   const handleServerUrlChange = (newUrl: string) => {
+    saveServerUrl(newUrl);
     setServerUrl(newUrl);
     api.updateBaseURL(newUrl);
     // Update harmony service URL as well
@@ -83,12 +112,30 @@ export default function SettingsTab() {
     checkServerStatus();
   };
 
+  const saveServerUrl = async (url: string) => {
+    try {
+      await AsyncStorage.setItem('server_url', url);
+    } catch (error) {
+      console.error('Failed to save server URL:', error);
+    }
+  };
+
   const handleProviderChange = (provider: 'gpt-oss' | 'huggingface') => {
+    saveProvider(provider);
     setSelectedProvider(provider);
     api.setProvider(provider);
   };
 
+  const saveProvider = async (provider: 'gpt-oss' | 'huggingface') => {
+    try {
+      await AsyncStorage.setItem('selected_provider', provider);
+    } catch (error) {
+      console.error('Failed to save provider:', error);
+    }
+  };
+
   const toggleEmbeddedServer = async (enabled: boolean) => {
+    await saveEmbeddedServerSetting(enabled);
     setUseEmbeddedServer(enabled);
     setEmbeddedServerState(prev => ({ ...prev, isLoading: true }));
     
@@ -139,6 +186,14 @@ export default function SettingsTab() {
         console.error('Error stopping server:', error);
         setEmbeddedServerState(prev => ({ ...prev, isLoading: false }));
       }
+    }
+  };
+
+  const saveEmbeddedServerSetting = async (enabled: boolean) => {
+    try {
+      await AsyncStorage.setItem('use_embedded_server', enabled.toString());
+    } catch (error) {
+      console.error('Failed to save embedded server setting:', error);
     }
   };
 
