@@ -471,17 +471,34 @@ const conversation = {
 
 ### **CORS Configuration for Cross-Platform Support**
 
-The app includes comprehensive CORS support for seamless communication between the React Native frontend and FastAPI backend:
+The app includes comprehensive CORS support for seamless communication between the React Native frontend and any backend server:
 
 #### **Embedded Server CORS (Automatic)**
 ```typescript
 // CORS automatically configured in embedded server
 app.use(cors({
-  origin: '*',
+  origin: ['*', 'http://localhost:8081', 'https://localhost:8081', 'exp://localhost:8081'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-  credentials: true
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Access-Control-Allow-Origin'],
+  credentials: true,
+  preflightContinue: false,
+  optionsSuccessStatus: 200
 }));
+
+// Additional CORS headers for React Native compatibility
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept, Access-Control-Allow-Origin');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  // Handle preflight OPTIONS requests
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+  next();
+});
 ```
 
 #### **Frontend CORS Headers**
@@ -493,8 +510,11 @@ const response = await fetch(`${baseURL}/api/endpoint`, {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
     'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept',
   },
   mode: 'cors',
+  credentials: 'omit',
   body: JSON.stringify(data),
 });
 ```
@@ -506,19 +526,34 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure for your domains in production
+    allow_origins=["*", "http://localhost:8081", "https://localhost:8081", "exp://localhost:8081"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["*"],
+    allow_headers=["Content-Type", "Authorization", "Accept", "Access-Control-Allow-Origin"],
+)
+
+# Add OPTIONS handler for preflight requests
+@app.options("/{full_path:path}")
+async def options_handler(request: Request):
+    return Response(
+        status_code=200,
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept, Access-Control-Allow-Origin",
+            "Access-Control-Allow-Credentials": "true",
+        }
+    )
 )
 ```
 
 #### **Network Compatibility**
-- **React Native**: Full CORS support with URL polyfill
+- **React Native**: Full CORS support with URL polyfill and proper headers
 - **Web Browser**: Standard CORS handling
 - **Mobile Apps**: Native HTTP requests with CORS headers
-- **Development**: Works with localhost and IP addresses
+- **Development**: Works with localhost, IP addresses, and Expo development URLs
 - **Production**: Configurable origins for security
+- **Preflight Requests**: Automatic handling of OPTIONS requests
 
 ## 🔧 Configuration
 
@@ -598,32 +633,140 @@ npm run build:web
 
 ### **CORS Troubleshooting**
 
-If you encounter CORS errors:
+If you encounter CORS errors, follow these steps:
 
-1. **Check FastAPI CORS middleware** is properly configured
-2. **Verify server URL** in app settings matches your FastAPI server
-3. **Test health endpoint** first: `GET /api/health`
-4. **Check browser console** for specific CORS error messages
-5. **Use IP address** instead of localhost for mobile testing
+#### **1. Verify Server CORS Configuration**
+```python
+# FastAPI - Ensure CORS middleware is properly configured
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*", "http://localhost:8081", "exp://localhost:8081"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "Accept", "Access-Control-Allow-Origin"],
+)
+```
+
+#### **2. Check Network Configuration**
+- **Verify server URL** in app settings matches your server
+- **Test health endpoint** first: `GET /api/health`
+- **Use IP address** instead of localhost for mobile testing
+- **Check firewall settings** allow connections on your server port
+
+#### **3. Debug CORS Issues**
+```bash
+# Test CORS with curl
+curl -H "Origin: http://localhost:8081" \
+     -H "Access-Control-Request-Method: POST" \
+     -H "Access-Control-Request-Headers: Content-Type" \
+     -X OPTIONS \
+     http://localhost:8000/api/health
+```
+
+#### **4. Browser Console Debugging**
+- **Open browser developer tools** (F12)
+- **Check Network tab** for failed requests
+- **Look for CORS error messages** in Console tab
+- **Verify request headers** are being sent correctly
 
 #### **Common CORS Issues & Solutions**
 
-**Issue**: `Access to fetch blocked by CORS policy`
+**Issue**: `Access to fetch blocked by CORS policy`  
+**Solution**: 
 ```python
-# Solution: Add CORS middleware to FastAPI
-app.add_middleware(CORSMiddleware, allow_origins=["*"])
+# Add comprehensive CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"]
+)
 ```
 
-**Issue**: `Network request failed` on mobile
+**Issue**: `Network request failed` on mobile  
+**Solution**:
 ```typescript
-// Solution: Use device IP instead of localhost
+// Use device IP instead of localhost
 const baseURL = 'http://192.168.1.100:8000'; // Your computer's IP
+
+// Or configure for Expo development
+const baseURL = __DEV__ 
+  ? 'http://192.168.1.100:8000'  // Development IP
+  : 'https://your-production-api.com';  // Production URL
 ```
 
-**Issue**: `Preflight request doesn't pass`
+**Issue**: `Preflight request doesn't pass`  
+**Solution**:
 ```python
-# Solution: Enable OPTIONS method in CORS
-allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+# Add explicit OPTIONS handler
+@app.options("/{full_path:path}")
+async def options_handler():
+    return Response(
+        status_code=200,
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept",
+        }
+    )
+```
+
+**Issue**: `CORS error in React Native but not in browser`  
+**Solution**:
+```typescript
+// Ensure React Native specific headers
+const headers = {
+  'Content-Type': 'application/json',
+  'Accept': 'application/json',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept',
+};
+
+// Use credentials: 'omit' for React Native
+const response = await fetch(url, {
+  method: 'POST',
+  headers,
+  mode: 'cors',
+  credentials: 'omit',  // Important for React Native
+  body: JSON.stringify(data),
+});
+```
+
+#### **5. Production CORS Configuration**
+```python
+# Production FastAPI CORS - More restrictive
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://your-domain.com",
+        "https://www.your-domain.com",
+        "https://your-app.netlify.app"
+    ],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["Content-Type", "Authorization"],
+)
+```
+
+#### **6. Development vs Production**
+```typescript
+// Environment-specific CORS configuration
+const corsConfig = {
+  development: {
+    origins: ['*'],
+    credentials: 'omit',
+  },
+  production: {
+    origins: ['https://your-domain.com'],
+    credentials: 'include',
+  }
+};
+
+const config = corsConfig[process.env.NODE_ENV] || corsConfig.development;
 ```
 
 ## 🌍 Humanitarian Impact

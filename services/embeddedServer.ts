@@ -30,12 +30,29 @@ export class EmbeddedAPIServer {
     // Enable CORS for React Native
     if (this.config.enableCors) {
       this.app.use(cors({
-        origin: '*',
+        origin: ['*', 'http://localhost:8081', 'https://localhost:8081', 'exp://localhost:8081'],
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-        credentials: true
+        allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Access-Control-Allow-Origin'],
+        credentials: true,
+        preflightContinue: false,
+        optionsSuccessStatus: 200
       }));
     }
+
+    // Additional CORS headers for React Native
+    this.app.use((req, res, next) => {
+      res.header('Access-Control-Allow-Origin', '*');
+      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept, Access-Control-Allow-Origin');
+      res.header('Access-Control-Allow-Credentials', 'true');
+      
+      // Handle preflight requests
+      if (req.method === 'OPTIONS') {
+        res.status(200).end();
+        return;
+      }
+      next();
+    });
 
     // Body parsing middleware
     this.app.use(bodyParser.json({ limit: '10mb' }));

@@ -63,9 +63,12 @@ export class LearnLocalAPI {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
           'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept',
         },
         body: JSON.stringify(request),
         mode: 'cors',
+        credentials: 'omit',
       });
 
       if (!response.ok) {
@@ -86,8 +89,11 @@ export class LearnLocalAPI {
         headers: {
           'Accept': 'application/json',
           'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept',
         },
         mode: 'cors',
+        credentials: 'omit',
       });
       
       if (!response.ok) {
@@ -108,8 +114,11 @@ export class LearnLocalAPI {
         headers: {
           'Accept': 'application/json',
           'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept',
         },
         mode: 'cors',
+        credentials: 'omit',
       });
       
       if (!response.ok) {
@@ -131,9 +140,12 @@ export class LearnLocalAPI {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
           'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept',
         },
         body: JSON.stringify(request),
         mode: 'cors',
+        credentials: 'omit',
       });
 
       if (!response.ok) {
@@ -155,6 +167,8 @@ export class LearnLocalAPI {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
           'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept',
         },
         body: JSON.stringify({
           text,
@@ -162,6 +176,7 @@ export class LearnLocalAPI {
           sourceLanguage,
         }),
         mode: 'cors',
+        credentials: 'omit',
       });
 
       if (!response.ok) {
@@ -183,9 +198,12 @@ export class LearnLocalAPI {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
           'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept',
         },
         body: JSON.stringify(request),
         mode: 'cors',
+        credentials: 'omit',
       });
 
       if (!response.ok) {
@@ -207,9 +225,12 @@ export class LearnLocalAPI {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
           'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept',
         },
         body: JSON.stringify(request),
         mode: 'cors',
+        credentials: 'omit',
       });
 
       if (!response.ok) {
