@@ -11,7 +11,7 @@ import {
   Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Send, Bot, User, Loader, AlertCircle, Wifi, WifiOff } from 'lucide-react-native';
+import { Send, Bot, User, Loader, CircleAlert as AlertCircle, Wifi, WifiOff } from 'lucide-react-native';
 import TranslationBar from '@/components/TranslationBar';
 import ChatMessageRenderer from '@/components/ChatMessageRenderer';
 import { offlineService, CachedChat } from '@/services/offlineService';
