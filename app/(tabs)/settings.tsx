@@ -3,6 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Settings as SettingsIcon, Server, Globe, Bell, Shield, CircleHelp as HelpCircle, Download, Languages, Volume2, CreditCard as Edit3, Share2, Wifi, Bluetooth } from 'lucide-react-native';
 import { useState, useEffect } from 'react';
 import { router } from 'expo-router';
+import { useEmbeddedServer } from '@/hooks/useEmbeddedServer';
 import DeviceSharingModal from '@/components/DeviceSharingModal';
 import ServerConfigModal from '@/components/ServerConfigModal';
 import { api } from '@/services/api';
@@ -12,12 +13,14 @@ import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 export default function SettingsTab() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [offlineMode, setOfflineMode] = useState(false);
+  const [useEmbeddedServer, setUseEmbeddedServer] = useState(false);
   const [showServerConfig, setShowServerConfig] = useState(false);
   const [showDeviceSharing, setShowDeviceSharing] = useState(false);
   const [serverUrl, setServerUrl] = useState('http://localhost:8000');
   const [serverStatus, setServerStatus] = useState<'online' | 'offline' | 'checking'>('offline');
   const [cacheSize, setCacheSize] = useState({ lessons: 0, chats: 0, totalMB: 0 });
   const networkStatus = useNetworkStatus();
+  const embeddedServer = useEmbeddedServer();
 
   useEffect(() => {
     checkServerStatus();
@@ -59,6 +62,22 @@ export default function SettingsTab() {
     checkServerStatus();
   };
 
+  const toggleEmbeddedServer = async (enabled: boolean) => {
+    setUseEmbeddedServer(enabled);
+    
+    if (enabled) {
+      const success = await embeddedServer.startServer();
+      if (success) {
+        setServerUrl(embeddedServer.serverUrl);
+        setServerStatus('online');
+      }
+    } else {
+      await embeddedServer.stopServer();
+      setServerUrl('http://localhost:8000');
+      checkServerStatus();
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -69,18 +88,40 @@ export default function SettingsTab() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>AI Model Configuration</Text>
           
+          <View style={styles.settingItem}>
+            <View style={styles.settingLeft}>
+              <Server size={20} color="#3B82F6" />
+              <View style={styles.settingText}>
+                <Text style={styles.settingTitle}>Embedded Server</Text>
+                <Text style={styles.settingSubtitle}>
+                  {embeddedServer.isServerRunning ? 'Running locally' : 'Use built-in AI server'}
+                </Text>
+              </View>
+            </View>
+            <Switch
+              value={useEmbeddedServer}
+              onValueChange={toggleEmbeddedServer}
+              trackColor={{ false: '#E5E7EB', true: '#3B82F6' }}
+              thumbColor="#FFFFFF"
+              disabled={embeddedServer.isStarting}
+            />
+          </View>
+
           <TouchableOpacity 
             style={styles.settingItem}
             onPress={() => setShowServerConfig(true)}
+            disabled={useEmbeddedServer}
           >
             <View style={styles.settingLeft}>
               <Server size={20} color="#3B82F6" />
               <View style={styles.settingText}>
                 <Text style={styles.settingTitle}>FastAPI Server</Text>
-                <Text style={styles.settingSubtitle}>{serverUrl}</Text>
+                <Text style={styles.settingSubtitle}>
+                  {useEmbeddedServer ? 'Using embedded server' : serverUrl}
+                </Text>
               </View>
             </View>
-            <Edit3 size={16} color="#94A3B8" />
+            <Edit3 size={16} color={useEmbeddedServer ? "#6B7280" : "#94A3B8"} />
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.settingItem}>
@@ -246,14 +287,28 @@ export default function SettingsTab() {
 
         <View style={styles.connectionStatus}>
           <Text style={styles.connectionTitle}>Connection Status</Text>
+          
+          {useEmbeddedServer && (
+            <View style={styles.statusItem}>
+              <View style={[
+                styles.statusDot, 
+                embeddedServer.isServerRunning ? styles.statusOnline : styles.statusOffline
+              ]} />
+              <Text style={styles.statusText}>
+                Embedded Server: {embeddedServer.isServerRunning ? 'Running' : 'Stopped'}
+              </Text>
+            </View>
+          )}
+          
           <View style={styles.statusItem}>
             <View style={[
               styles.statusDot, 
-              serverStatus === 'online' ? styles.statusOnline : 
+              (serverStatus === 'online' || embeddedServer.isServerRunning) ? styles.statusOnline : 
               serverStatus === 'checking' ? styles.statusChecking : styles.statusOffline
             ]} />
             <Text style={styles.statusText}>
-              FastAPI Server: {
+              {useEmbeddedServer ? 'Embedded' : 'FastAPI'} Server: {
+                embeddedServer.isServerRunning ? 'Connected' :
                 serverStatus === 'online' ? 'Connected' :
                 serverStatus === 'checking' ? 'Checking...' : 'Disconnected'
               }
@@ -262,14 +317,18 @@ export default function SettingsTab() {
           <View style={styles.statusItem}>
             <View style={[
               styles.statusDot, 
-              serverStatus === 'online' ? styles.statusOnline : styles.statusOffline
+              (serverStatus === 'online' || embeddedServer.isServerRunning) ? styles.statusOnline : styles.statusOffline
             ]} />
             <Text style={styles.statusText}>
-              GPT-OSS Model: {serverStatus === 'online' ? 'Available' : 'Not Available'}
+              AI Model: {(serverStatus === 'online' || embeddedServer.isServerRunning) ? 'Available' : 'Not Available'}
             </Text>
           </View>
+          
           <Text style={styles.statusNote}>
-            Make sure your FastAPI server is running on {serverUrl} with the GPT-OSS model loaded.
+            {useEmbeddedServer 
+              ? 'Using built-in AI server for offline functionality. No external server required.'
+              : `Make sure your FastAPI server is running on ${serverUrl} with the GPT-OSS model loaded.`
+            }
           </Text>
         </View>
 
