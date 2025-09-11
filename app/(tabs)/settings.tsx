@@ -5,8 +5,6 @@ import { useState, useEffect } from 'react';
 import { router } from 'expo-router';
 import ServerConfigModal from '@/components/ServerConfigModal';
 import { api } from '@/services/api';
-import ServerConfigModal from '@/components/ServerConfigModal';
-import { api } from '@/services/api';
 
 export default function SettingsTab() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
