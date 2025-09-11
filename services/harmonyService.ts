@@ -89,7 +89,7 @@ Make the lesson engaging, interactive, and age-appropriate. Include real-world e
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          conversation,
+          messages: conversation.messages,
           model: 'gpt-oss',
           maxTokens: 2000,
         }),
@@ -104,12 +104,15 @@ Make the lesson engaging, interactive, and age-appropriate. Include real-world e
       // Parse the generated lesson content
       let lessonData;
       try {
-        lessonData = JSON.parse(data.content);
+        // Handle different response formats
+        const content = data.response || data.content || data.message || '';
+        lessonData = JSON.parse(content);
       } catch (parseError) {
         // Fallback if the model doesn't return valid JSON
+        const content = data.response || data.content || data.message || 'Generated lesson content';
         lessonData = {
           title: `${request.topic} Lesson`,
-          content: data.content,
+          content: content,
           activities: [
             'Discuss the main concepts with a partner',
             'Create a mind map of key ideas',

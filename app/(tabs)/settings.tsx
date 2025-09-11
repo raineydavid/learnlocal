@@ -5,10 +5,35 @@ import { useState, useEffect } from 'react';
 import { router } from 'expo-router';
 import ServerConfigModal from '@/components/ServerConfigModal';
 import { api } from '@/services/api';
+import ServerConfigModal from '@/components/ServerConfigModal';
+import { api } from '@/services/api';
 
 export default function SettingsTab() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [offlineMode, setOfflineMode] = useState(false);
+  const [showServerConfig, setShowServerConfig] = useState(false);
+  const [serverUrl, setServerUrl] = useState('http://localhost:8000');
+  const [serverStatus, setServerStatus] = useState<'online' | 'offline' | 'checking'>('offline');
+
+  useEffect(() => {
+    checkServerStatus();
+  }, [serverUrl]);
+
+  const checkServerStatus = async () => {
+    setServerStatus('checking');
+    try {
+      await api.checkServerStatus();
+      setServerStatus('online');
+    } catch (error) {
+      setServerStatus('offline');
+    }
+  };
+
+  const handleServerUrlChange = (newUrl: string) => {
+    setServerUrl(newUrl);
+    api.updateBaseURL(newUrl);
+    checkServerStatus();
+  };
   const [showServerConfig, setShowServerConfig] = useState(false);
   const [serverUrl, setServerUrl] = useState('http://localhost:8000');
   const [serverStatus, setServerStatus] = useState<'online' | 'offline' | 'checking'>('offline');
@@ -47,6 +72,9 @@ export default function SettingsTab() {
             style={styles.settingItem}
             onPress={() => setShowServerConfig(true)}
           >
+            style={styles.settingItem}
+            onPress={() => setShowServerConfig(true)}
+          >
             <View style={styles.settingLeft}>
               <Server size={20} color="#3B82F6" />
               <View style={styles.settingText}>
@@ -54,6 +82,7 @@ export default function SettingsTab() {
                 <Text style={styles.settingSubtitle}>{serverUrl}</Text>
               </View>
             </View>
+            <Edit3 size={16} color="#94A3B8" />
             <Edit3 size={16} color="#94A3B8" />
           </TouchableOpacity>
 
@@ -169,10 +198,24 @@ export default function SettingsTab() {
                 serverStatus === 'checking' ? 'Checking...' : 'Disconnected'
               }
             </Text>
+              serverStatus === 'online' ? styles.statusOnline : 
+              serverStatus === 'checking' ? styles.statusChecking : styles.statusOffline
+            ]} />
+            <Text style={styles.statusText}>
+              FastAPI Server: {
+                serverStatus === 'online' ? 'Connected' :
+                serverStatus === 'checking' ? 'Checking...' : 'Disconnected'
+              }
+            </Text>
           </View>
           <View style={styles.statusItem}>
             <View style={[
               styles.statusDot, 
+              serverStatus === 'online' ? styles.statusOnline : styles.statusOffline
+            ]} />
+            <Text style={styles.statusText}>
+              GPT-OSS Model: {serverStatus === 'online' ? 'Available' : 'Not Available'}
+            </Text>
               serverStatus === 'online' ? styles.statusOnline : styles.statusOffline
             ]} />
             <Text style={styles.statusText}>
@@ -183,6 +226,13 @@ export default function SettingsTab() {
             Make sure your FastAPI server is running on {serverUrl} with the GPT-OSS model loaded.
           </Text>
         </View>
+
+        <ServerConfigModal
+          visible={showServerConfig}
+          currentUrl={serverUrl}
+          onSave={handleServerUrlChange}
+          onClose={() => setShowServerConfig(false)}
+        />
 
         <ServerConfigModal
           visible={showServerConfig}
@@ -278,6 +328,9 @@ const styles = StyleSheet.create({
   },
   statusOnline: {
     backgroundColor: '#10B981',
+  },
+  statusChecking: {
+    backgroundColor: '#F59E0B',
   },
   statusChecking: {
     backgroundColor: '#F59E0B',

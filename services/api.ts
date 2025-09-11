@@ -47,6 +47,14 @@ export class LearnLocalAPI {
     this.baseURL = baseURL;
   }
 
+  updateBaseURL(newBaseURL: string) {
+    this.baseURL = newBaseURL;
+  }
+
+  getBaseURL(): string {
+    return this.baseURL;
+  }
+
   async sendChatMessage(request: ChatRequest): Promise<ChatResponse> {
     try {
       const response = await fetch(`${this.baseURL}/api/chat`, {

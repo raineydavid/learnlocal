@@ -48,7 +48,7 @@ export default function GenerateTab() {
         pathname: '/generated-lesson/[id]',
         params: { 
           id: generatedLesson.id,
-          lessonData: JSON.stringify(generatedLesson)
+          lessonData: JSON.stringify(generatedLesson),
         }
       });
     } catch (error) {
