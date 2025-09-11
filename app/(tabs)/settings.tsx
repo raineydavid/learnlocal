@@ -1,12 +1,37 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Settings as SettingsIcon, Server, Globe, Bell, Shield, CircleHelp as HelpCircle, Download, Languages, Volume2 } from 'lucide-react-native';
-import { useState } from 'react';
+import { Settings as SettingsIcon, Server, Globe, Bell, Shield, CircleHelp as HelpCircle, Download, Languages, Volume2, Edit3 } from 'lucide-react-native';
+import { useState, useEffect } from 'react';
 import { router } from 'expo-router';
+import ServerConfigModal from '@/components/ServerConfigModal';
+import { api } from '@/services/api';
 
 export default function SettingsTab() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [offlineMode, setOfflineMode] = useState(false);
+  const [showServerConfig, setShowServerConfig] = useState(false);
+  const [serverUrl, setServerUrl] = useState('http://localhost:8000');
+  const [serverStatus, setServerStatus] = useState<'online' | 'offline' | 'checking'>('offline');
+
+  useEffect(() => {
+    checkServerStatus();
+  }, [serverUrl]);
+
+  const checkServerStatus = async () => {
+    setServerStatus('checking');
+    try {
+      await api.checkServerStatus();
+      setServerStatus('online');
+    } catch (error) {
+      setServerStatus('offline');
+    }
+  };
+
+  const handleServerUrlChange = (newUrl: string) => {
+    setServerUrl(newUrl);
+    api.updateBaseURL(newUrl);
+    checkServerStatus();
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -18,14 +43,18 @@ export default function SettingsTab() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>AI Model Configuration</Text>
           
-          <TouchableOpacity style={styles.settingItem}>
+          <TouchableOpacity 
+            style={styles.settingItem}
+            onPress={() => setShowServerConfig(true)}
+          >
             <View style={styles.settingLeft}>
               <Server size={20} color="#3B82F6" />
               <View style={styles.settingText}>
                 <Text style={styles.settingTitle}>FastAPI Server</Text>
-                <Text style={styles.settingSubtitle}>localhost:8000</Text>
+                <Text style={styles.settingSubtitle}>{serverUrl}</Text>
               </View>
             </View>
+            <Edit3 size={16} color="#94A3B8" />
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.settingItem}>
@@ -129,17 +158,38 @@ export default function SettingsTab() {
         <View style={styles.connectionStatus}>
           <Text style={styles.connectionTitle}>Connection Status</Text>
           <View style={styles.statusItem}>
-            <View style={[styles.statusDot, styles.statusOffline]} />
-            <Text style={styles.statusText}>FastAPI Server: Disconnected</Text>
+            <View style={[
+              styles.statusDot, 
+              serverStatus === 'online' ? styles.statusOnline : 
+              serverStatus === 'checking' ? styles.statusChecking : styles.statusOffline
+            ]} />
+            <Text style={styles.statusText}>
+              FastAPI Server: {
+                serverStatus === 'online' ? 'Connected' :
+                serverStatus === 'checking' ? 'Checking...' : 'Disconnected'
+              }
+            </Text>
           </View>
           <View style={styles.statusItem}>
-            <View style={[styles.statusDot, styles.statusOffline]} />
-            <Text style={styles.statusText}>GPT-OSS Model: Not Available</Text>
+            <View style={[
+              styles.statusDot, 
+              serverStatus === 'online' ? styles.statusOnline : styles.statusOffline
+            ]} />
+            <Text style={styles.statusText}>
+              GPT-OSS Model: {serverStatus === 'online' ? 'Available' : 'Not Available'}
+            </Text>
           </View>
           <Text style={styles.statusNote}>
-            Make sure your FastAPI server is running on localhost:8000 with the GPT-OSS model loaded.
+            Make sure your FastAPI server is running on {serverUrl} with the GPT-OSS model loaded.
           </Text>
         </View>
+
+        <ServerConfigModal
+          visible={showServerConfig}
+          currentUrl={serverUrl}
+          onSave={handleServerUrlChange}
+          onClose={() => setShowServerConfig(false)}
+        />
       </ScrollView>
     </SafeAreaView>
   );
@@ -228,6 +278,9 @@ const styles = StyleSheet.create({
   },
   statusOnline: {
     backgroundColor: '#10B981',
+  },
+  statusChecking: {
+    backgroundColor: '#F59E0B',
   },
   statusText: {
     fontSize: 14,
