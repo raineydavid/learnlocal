@@ -157,13 +157,12 @@ export default function ModelDownloadScreen({ onComplete }: ModelDownloadScreenP
         <TouchableOpacity
           style={[
             styles.continueButton,
-            canProceed() ? styles.continueButtonEnabled : styles.continueButtonDisabled,
+            styles.continueButtonEnabled,
           ]}
           onPress={onComplete}
-          disabled={!canProceed()}
         >
           <Text style={styles.continueButtonText}>
-            {canProceed() ? 'Continue to App' : 'Download Required Models'}
+            {canProceed() ? 'Continue' : 'Close'}
           </Text>
         </TouchableOpacity>
       </View>

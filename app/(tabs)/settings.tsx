@@ -64,7 +64,7 @@ export default function SettingsTab() {
 
           <TouchableOpacity 
             style={styles.settingItem}
-            onPress={() => router.push('/models')}
+            onPress={() => router.push('/models' as any)}
           >
             <View style={styles.settingLeft}>
               <Download size={20} color="#3B82F6" />
