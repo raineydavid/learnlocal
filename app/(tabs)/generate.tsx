@@ -29,8 +29,8 @@ export default function GenerateTab() {
   const providers = [
     { 
       id: 'gpt-oss' as const, 
-      title: 'GPT-OSS Local', 
-      description: 'Local 20B model on your server',
+      title: 'GPT-OSS Models', 
+      description: 'OpenAI GPT-OSS 20B/120B models',
       icon: Zap,
       color: '#4F46E5'
     },

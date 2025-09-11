@@ -85,15 +85,22 @@ export class EmbeddedAI {
 
   private async loadModels() {
     // Simulate loading embedded AI models
-    this.models.set('chat-model', {
-      name: 'Embedded Chat Model',
-      size: 500, // MB
+    this.models.set('openai/gpt-oss-20b', {
+      name: 'GPT-OSS 20B (Embedded)',
+      size: 40000, // MB (40GB)
       isLoaded: true,
       capabilities: ['conversation', 'question-answering', 'explanation']
     });
 
+    this.models.set('openai/gpt-oss-120b', {
+      name: 'GPT-OSS 120B (Embedded)',
+      size: 240000, // MB (240GB)
+      isLoaded: false, // Larger model, not loaded by default
+      capabilities: ['conversation', 'question-answering', 'explanation', 'advanced-reasoning']
+    });
+
     this.models.set('lesson-generator', {
-      name: 'Lesson Generation Model',
+      name: 'Educational Content Generator',
       size: 800, // MB
       isLoaded: true,
       capabilities: ['lesson-creation', 'content-structuring', 'activity-generation']

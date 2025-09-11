@@ -38,6 +38,7 @@ export class OfflineAI {
   constructor() {
     this.initializeKnowledgeBase();
     this.loadInstalledModels();
+    this.activeModel = 'openai/gpt-oss-20b'; // Default to 20B model
   }
 
   private initializeKnowledgeBase() {
@@ -94,12 +95,23 @@ export class OfflineAI {
       const offlineModels = stored ? JSON.parse(stored) : {};
       
       // Load default models
-      this.models.set('gpt-oss-base', {
-        id: 'gpt-oss-base',
-        name: 'GPT-OSS Base',
+      this.models.set('openai/gpt-oss-20b', {
+        id: 'openai/gpt-oss-20b',
+        name: 'GPT-OSS 20B',
         source: 'gpt-oss',
+        modelId: 'openai/gpt-oss-20b',
         capabilities: ['chat', 'lesson-generation', 'text-completion'],
-        size: 4200000000, // 4.2GB
+        size: 40000000000, // 40GB
+        isLoaded: true
+      });
+
+      this.models.set('openai/gpt-oss-120b', {
+        id: 'openai/gpt-oss-120b',
+        name: 'GPT-OSS 120B',
+        source: 'gpt-oss',
+        modelId: 'openai/gpt-oss-120b',
+        capabilities: ['chat', 'lesson-generation', 'text-completion', 'advanced-reasoning'],
+        size: 240000000000, // 240GB
         isLoaded: true
       });
 

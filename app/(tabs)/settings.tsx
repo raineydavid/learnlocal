@@ -469,7 +469,7 @@ export default function SettingsTab() {
               serverStatus === 'online' ? styles.statusOnline : styles.statusOffline
             ]} />
             <Text style={styles.statusText}>
-              AI Provider: {selectedProvider === 'gpt-oss' ? 'GPT-OSS Local' : 'Hugging Face Offline'}
+              AI Provider: {selectedProvider === 'gpt-oss' ? 'GPT-OSS (20B/120B)' : 'Hugging Face Offline'}
             </Text>
           </View>
 

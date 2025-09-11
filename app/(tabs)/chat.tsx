@@ -166,7 +166,7 @@ export default function ChatTab() {
                 <Download size={16} color="#FF6B35" />
               )}
               <Text style={styles.providerText}>
-                {currentProvider === 'gpt-oss' ? 'GPT-OSS Local' : 'HF Offline'}
+                {currentProvider === 'gpt-oss' ? 'GPT-OSS' : 'HF Offline'}
               </Text>
             </View>
           </View>

@@ -47,14 +47,26 @@ export class ModelService {
       // Return default models if API is unavailable
       return [
         {
-          name: 'GPT-OSS Base',
+          name: 'GPT-OSS 20B',
           version: '1.0.0',
-          size: '4.2 GB',
-          description: 'Core language model for chat and learning assistance',
-          downloadUrl: 'https://example.com/gpt-oss-base.bin',
+          size: '40 GB',
+          description: 'OpenAI GPT-OSS 20B model for chat and learning assistance',
+          downloadUrl: 'https://huggingface.co/openai/gpt-oss-20b',
           isRequired: true,
           source: 'gpt-oss',
+          modelId: 'openai/gpt-oss-20b',
           capabilities: ['chat', 'lesson-generation', 'text-completion']
+        },
+        {
+          name: 'GPT-OSS 120B',
+          version: '1.0.0',
+          size: '240 GB',
+          description: 'OpenAI GPT-OSS 120B model - larger, more capable version',
+          downloadUrl: 'https://huggingface.co/openai/gpt-oss-120b',
+          isRequired: false,
+          source: 'gpt-oss',
+          modelId: 'openai/gpt-oss-120b',
+          capabilities: ['chat', 'lesson-generation', 'text-completion', 'advanced-reasoning']
         },
         {
           name: 'Hugging Face - DialoGPT Medium',
