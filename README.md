@@ -369,14 +369,33 @@ const conversation = {
    npm install
    ```
 
-2. **Start FastAPI server** on localhost:8000 with GPT-OSS model:
+2. **Configure FastAPI server** with CORS enabled:
    ```python
-   # Your FastAPI server should implement:
+   # FastAPI server configuration with CORS
+   from fastapi import FastAPI
+   from fastapi.middleware.cors import CORSMiddleware
+   
+   app = FastAPI()
+   
+   # Enable CORS for React Native
+   app.add_middleware(
+       CORSMiddleware,
+       allow_origins=["*"],  # In production, specify your domains
+       allow_credentials=True,
+       allow_methods=["*"],
+       allow_headers=["*"],
+   )
+   
+   # Required endpoints:
    # POST /api/generate-lesson
    # POST /api/chat  
    # GET /api/health
    # POST /api/translate
    # POST /api/tts
+   # GET /api/models/available
+   # GET /api/models/status
+   # POST /api/models/download
+   # POST /api/models/install
    ```
 
 3. **Run the Expo app**:
@@ -385,6 +404,46 @@ const conversation = {
    ```
 
 4. **Configure server URL** in Settings if different from localhost:8000
+
+### **CORS Configuration for Cross-Platform Support**
+
+The app includes comprehensive CORS support for seamless communication between the React Native frontend and FastAPI backend:
+
+#### **Frontend CORS Headers**
+```typescript
+// All API requests include CORS headers
+const response = await fetch(`${baseURL}/api/endpoint`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+  },
+  mode: 'cors',
+  body: JSON.stringify(data),
+});
+```
+
+#### **Backend CORS Setup Required**
+```python
+# FastAPI CORS middleware configuration
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Configure for your domains in production
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
+)
+```
+
+#### **Network Compatibility**
+- **React Native**: Full CORS support with URL polyfill
+- **Web Browser**: Standard CORS handling
+- **Mobile Apps**: Native HTTP requests with CORS headers
+- **Development**: Works with localhost and IP addresses
+- **Production**: Configurable origins for security
 
 ## 🔧 Configuration
 
@@ -396,11 +455,53 @@ EXPO_PUBLIC_CACHE_EXPIRY_DAYS=30
 EXPO_PUBLIC_MAX_CACHED_LESSONS=50
 ```
 
+### **Network Configuration**
+```typescript
+// API service configuration
+const api = new LearnLocalAPI('http://localhost:8000');
+
+// For development with IP address
+const api = new LearnLocalAPI('http://192.168.1.100:8000');
+
+// For production
+const api = new LearnLocalAPI('https://your-api-server.com');
+```
+
 ### **Offline Settings**
 - **Cache Limits**: Configurable lesson and chat storage limits
 - **Expiry Management**: Automatic cleanup of old cached content
 - **Storage Monitoring**: Real-time cache size tracking
 - **Manual Cache Control**: Clear cache and manage storage
+
+### **CORS Troubleshooting**
+
+If you encounter CORS errors:
+
+1. **Check FastAPI CORS middleware** is properly configured
+2. **Verify server URL** in app settings matches your FastAPI server
+3. **Test health endpoint** first: `GET /api/health`
+4. **Check browser console** for specific CORS error messages
+5. **Use IP address** instead of localhost for mobile testing
+
+#### **Common CORS Issues & Solutions**
+
+**Issue**: `Access to fetch blocked by CORS policy`
+```python
+# Solution: Add CORS middleware to FastAPI
+app.add_middleware(CORSMiddleware, allow_origins=["*"])
+```
+
+**Issue**: `Network request failed` on mobile
+```typescript
+// Solution: Use device IP instead of localhost
+const baseURL = 'http://192.168.1.100:8000'; // Your computer's IP
+```
+
+**Issue**: `Preflight request doesn't pass`
+```python
+# Solution: Enable OPTIONS method in CORS
+allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+```
 
 ## 🌍 Humanitarian Impact
 

@@ -40,6 +40,14 @@
                 }
               }
             }
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              }
+            }
           }
         }
       }

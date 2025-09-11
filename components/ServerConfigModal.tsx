@@ -41,7 +41,11 @@ export default function ServerConfigModal({ visible, currentUrl, onSave, onClose
       // Test the connection
       const response = await fetch(`${trimmedUrl}/api/health`, {
         method: 'GET',
-        timeout: 5000,
+        headers: {
+          'Accept': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+        mode: 'cors',
       });
       
       if (response.ok) {

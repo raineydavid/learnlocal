@@ -24,7 +24,14 @@ export class ModelService {
 
   async getAvailableModels(): Promise<ModelInfo[]> {
     try {
-      const response = await fetch(`${this.baseURL}/api/models/available`);
+      const response = await fetch(`${this.baseURL}/api/models/available`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+        mode: 'cors',
+      });
       
       if (!response.ok) {
         throw new Error(`Failed to fetch models: ${response.status}`);
@@ -65,7 +72,14 @@ export class ModelService {
 
   async checkModelStatus(): Promise<{ [key: string]: boolean }> {
     try {
-      const response = await fetch(`${this.baseURL}/api/models/status`);
+      const response = await fetch(`${this.baseURL}/api/models/status`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+        mode: 'cors',
+      });
       
       if (!response.ok) {
         throw new Error(`Failed to check model status: ${response.status}`);
@@ -90,11 +104,14 @@ export class ModelService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Access-Control-Allow-Origin': '*',
         },
         body: JSON.stringify({
           modelName: model.name,
           downloadUrl: model.downloadUrl,
         }),
+        mode: 'cors',
       });
 
       if (!response.ok) {
@@ -128,8 +145,11 @@ export class ModelService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Access-Control-Allow-Origin': '*',
         },
         body: JSON.stringify({ modelName }),
+        mode: 'cors',
       });
 
       return response.ok;

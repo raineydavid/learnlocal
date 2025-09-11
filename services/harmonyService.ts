@@ -113,12 +113,15 @@ Make the lesson engaging, interactive, and age-appropriate. Include real-world e
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Access-Control-Allow-Origin': '*',
         },
         body: JSON.stringify({
           messages: conversation.messages,
           model: 'gpt-oss',
           maxTokens: 2000,
         }),
+        mode: 'cors',
       });
 
       if (!response.ok) {
@@ -231,12 +234,15 @@ Make the lesson engaging, interactive, and age-appropriate. Include real-world e
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Access-Control-Allow-Origin': '*',
         },
         body: JSON.stringify({
           conversation,
           lessonId,
           model: 'gpt-oss',
         }),
+        mode: 'cors',
       });
 
       if (!response.ok) {

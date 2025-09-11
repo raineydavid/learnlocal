@@ -61,8 +61,11 @@ export class LearnLocalAPI {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Access-Control-Allow-Origin': '*',
         },
         body: JSON.stringify(request),
+        mode: 'cors',
       });
 
       if (!response.ok) {
@@ -78,7 +81,14 @@ export class LearnLocalAPI {
 
   async getLearningModules(): Promise<LearningModule[]> {
     try {
-      const response = await fetch(`${this.baseURL}/api/modules`);
+      const response = await fetch(`${this.baseURL}/api/modules`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+        mode: 'cors',
+      });
       
       if (!response.ok) {
         throw new Error(`API request failed: ${response.status}`);
@@ -93,7 +103,14 @@ export class LearnLocalAPI {
 
   async checkServerStatus(): Promise<{ status: string; model: string }> {
     try {
-      const response = await fetch(`${this.baseURL}/api/health`);
+      const response = await fetch(`${this.baseURL}/api/health`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+        mode: 'cors',
+      });
       
       if (!response.ok) {
         throw new Error(`Health check failed: ${response.status}`);
@@ -112,8 +129,11 @@ export class LearnLocalAPI {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Access-Control-Allow-Origin': '*',
         },
         body: JSON.stringify(request),
+        mode: 'cors',
       });
 
       if (!response.ok) {
@@ -133,12 +153,15 @@ export class LearnLocalAPI {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Access-Control-Allow-Origin': '*',
         },
         body: JSON.stringify({
           text,
           targetLanguage,
           sourceLanguage,
         }),
+        mode: 'cors',
       });
 
       if (!response.ok) {
@@ -158,8 +181,11 @@ export class LearnLocalAPI {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Access-Control-Allow-Origin': '*',
         },
         body: JSON.stringify(request),
+        mode: 'cors',
       });
 
       if (!response.ok) {
@@ -179,8 +205,11 @@ export class LearnLocalAPI {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Access-Control-Allow-Origin': '*',
         },
         body: JSON.stringify(request),
+        mode: 'cors',
       });
 
       if (!response.ok) {

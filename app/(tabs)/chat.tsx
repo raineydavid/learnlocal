@@ -107,11 +107,14 @@ export default function ChatTab() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Access-Control-Allow-Origin': '*',
         },
         body: JSON.stringify({
           message: userMessage.text,
           model: 'gpt-oss',
         }),
+        mode: 'cors',
       });
 
       if (response.ok) {

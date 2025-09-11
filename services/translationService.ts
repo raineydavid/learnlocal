@@ -23,8 +23,11 @@ export class TranslationService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Access-Control-Allow-Origin': '*',
         },
         body: JSON.stringify(request),
+        mode: 'cors',
       });
 
       if (!response.ok) {

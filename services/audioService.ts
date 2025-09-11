@@ -51,12 +51,15 @@ export class AudioService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Access-Control-Allow-Origin': '*',
         },
         body: JSON.stringify({
           text,
           language,
           model: 'local-tts',
         }),
+        mode: 'cors',
       });
 
       if (!response.ok) {
