@@ -3,7 +3,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Settings as SettingsIcon, Server, Globe, Bell, Shield, CircleHelp as HelpCircle, Download, Languages, Volume2, CreditCard as Edit3, Share2, Wifi, Bluetooth } from 'lucide-react-native';
 import { useState, useEffect } from 'react';
 import { router } from 'expo-router';
-import { useEmbeddedServer } from '@/hooks/useEmbeddedServer';
 import DeviceSharingModal from '@/components/DeviceSharingModal';
 import ServerConfigModal from '@/components/ServerConfigModal';
 import { api } from '@/services/api';
@@ -20,7 +19,14 @@ export default function SettingsTab() {
   const [serverStatus, setServerStatus] = useState<'online' | 'offline' | 'checking'>('offline');
   const [cacheSize, setCacheSize] = useState({ lessons: 0, chats: 0, totalMB: 0 });
   const networkStatus = useNetworkStatus();
-  const embeddedServer = useEmbeddedServer();
+  
+  // Embedded server state management
+  const [embeddedServerState, setEmbeddedServerState] = useState({
+    isRunning: false,
+    isLoading: false,
+    url: '',
+    error: null as string | null
+  });
 
   useEffect(() => {
     checkServerStatus();
@@ -64,17 +70,55 @@ export default function SettingsTab() {
 
   const toggleEmbeddedServer = async (enabled: boolean) => {
     setUseEmbeddedServer(enabled);
+    setEmbeddedServerState(prev => ({ ...prev, isLoading: true }));
     
     if (enabled) {
-      const success = await embeddedServer.startServer();
-      if (success) {
-        setServerUrl(embeddedServer.serverUrl);
-        setServerStatus('online');
+      try {
+        // Import embedded server only when needed (for web compatibility)
+        const { embeddedServer } = await import('@/services/embeddedServer');
+        const success = await embeddedServer.start();
+        
+        if (success) {
+          setEmbeddedServerState({
+            isRunning: true,
+            isLoading: false,
+            url: embeddedServer.getServerUrl(),
+            error: null
+          });
+          setServerUrl(embeddedServer.getServerUrl());
+          setServerStatus('online');
+        } else {
+          setEmbeddedServerState({
+            isRunning: false,
+            isLoading: false,
+            url: '',
+            error: 'Failed to start embedded server'
+          });
+        }
+      } catch (error) {
+        setEmbeddedServerState({
+          isRunning: false,
+          isLoading: false,
+          url: '',
+          error: error instanceof Error ? error.message : 'Unknown error'
+        });
       }
     } else {
-      await embeddedServer.stopServer();
-      setServerUrl('http://localhost:8000');
-      checkServerStatus();
+      try {
+        const { embeddedServer } = await import('@/services/embeddedServer');
+        await embeddedServer.stop();
+        setEmbeddedServerState({
+          isRunning: false,
+          isLoading: false,
+          url: '',
+          error: null
+        });
+        setServerUrl('http://localhost:8000');
+        checkServerStatus();
+      } catch (error) {
+        console.error('Error stopping server:', error);
+        setEmbeddedServerState(prev => ({ ...prev, isLoading: false }));
+      }
     }
   };
 
@@ -94,7 +138,7 @@ export default function SettingsTab() {
               <View style={styles.settingText}>
                 <Text style={styles.settingTitle}>Embedded Server</Text>
                 <Text style={styles.settingSubtitle}>
-                  {embeddedServer.isServerRunning ? 'Running locally' : 'Use built-in AI server'}
+                  {embeddedServerState.isRunning ? 'Running locally' : 'Use built-in AI server'}
                 </Text>
               </View>
             </View>
@@ -103,7 +147,7 @@ export default function SettingsTab() {
               onValueChange={toggleEmbeddedServer}
               trackColor={{ false: '#E5E7EB', true: '#3B82F6' }}
               thumbColor="#FFFFFF"
-              disabled={embeddedServer.isStarting}
+              disabled={embeddedServerState.isLoading}
             />
           </View>
 
@@ -292,10 +336,10 @@ export default function SettingsTab() {
             <View style={styles.statusItem}>
               <View style={[
                 styles.statusDot, 
-                embeddedServer.isServerRunning ? styles.statusOnline : styles.statusOffline
+                embeddedServerState.isRunning ? styles.statusOnline : styles.statusOffline
               ]} />
               <Text style={styles.statusText}>
-                Embedded Server: {embeddedServer.isServerRunning ? 'Running' : 'Stopped'}
+                Embedded Server: {embeddedServerState.isRunning ? 'Running' : 'Stopped'}
               </Text>
             </View>
           )}
@@ -303,12 +347,12 @@ export default function SettingsTab() {
           <View style={styles.statusItem}>
             <View style={[
               styles.statusDot, 
-              (serverStatus === 'online' || embeddedServer.isServerRunning) ? styles.statusOnline : 
+              (serverStatus === 'online' || embeddedServerState.isRunning) ? styles.statusOnline : 
               serverStatus === 'checking' ? styles.statusChecking : styles.statusOffline
             ]} />
             <Text style={styles.statusText}>
               {useEmbeddedServer ? 'Embedded' : 'FastAPI'} Server: {
-                embeddedServer.isServerRunning ? 'Connected' :
+                embeddedServerState.isRunning ? 'Connected' :
                 serverStatus === 'online' ? 'Connected' :
                 serverStatus === 'checking' ? 'Checking...' : 'Disconnected'
               }
@@ -317,10 +361,10 @@ export default function SettingsTab() {
           <View style={styles.statusItem}>
             <View style={[
               styles.statusDot, 
-              (serverStatus === 'online' || embeddedServer.isServerRunning) ? styles.statusOnline : styles.statusOffline
+              (serverStatus === 'online' || embeddedServerState.isRunning) ? styles.statusOnline : styles.statusOffline
             ]} />
             <Text style={styles.statusText}>
-              AI Model: {(serverStatus === 'online' || embeddedServer.isServerRunning) ? 'Available' : 'Not Available'}
+              AI Model: {(serverStatus === 'online' || embeddedServerState.isRunning) ? 'Available' : 'Not Available'}
             </Text>
           </View>
           
