@@ -51,14 +51,14 @@ export default function ServerConfigModal({ visible, currentUrl, onSave, onClose
       if (response.ok) {
         onSave(trimmedUrl);
         onClose();
-        Alert.alert('Success', 'Server URL updated and connection verified!');
+        Alert.alert('Success', `Server URL updated to ${trimmedUrl} and connection verified!`);
       } else {
-        Alert.alert('Warning', 'Server URL saved but connection could not be verified. Make sure your FastAPI server is running.');
+        Alert.alert('Warning', `Server URL updated to ${trimmedUrl} but connection could not be verified. Make sure your FastAPI server is running on this URL.`);
         onSave(trimmedUrl);
         onClose();
       }
     } catch (error) {
-      Alert.alert('Warning', 'Server URL saved but connection could not be verified. Make sure your FastAPI server is running.');
+      Alert.alert('Warning', `Server URL updated to ${trimmedUrl} but connection could not be verified. Make sure your FastAPI server is running on this URL.`);
       onSave(trimmedUrl);
       onClose();
     } finally {

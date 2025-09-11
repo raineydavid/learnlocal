@@ -78,6 +78,8 @@ export default function SettingsTab() {
   const handleServerUrlChange = (newUrl: string) => {
     setServerUrl(newUrl);
     api.updateBaseURL(newUrl);
+    // Update harmony service URL as well
+    harmonyLessonService.updateBaseURL(newUrl);
     checkServerStatus();
   };
 

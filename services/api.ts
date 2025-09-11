@@ -57,6 +57,7 @@ export class LearnLocalAPI {
 
   updateBaseURL(newBaseURL: string) {
     this.baseURL = newBaseURL;
+    console.log(`API service updated to use: ${newBaseURL}`);
   }
 
   getBaseURL(): string {

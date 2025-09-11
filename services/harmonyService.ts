@@ -39,6 +39,12 @@ export class HarmonyLessonService {
     this.baseURL = baseURL;
   }
 
+  updateBaseURL(newBaseURL: string) {
+    this.baseURL = newBaseURL;
+    // Update the API service URL as well
+    api.updateBaseURL(newBaseURL);
+  }
+
   private createLessonPrompt(request: LessonRequest): HarmonyConversation {
     const categoryDescriptions = {
       'stem': 'Science, Technology, Engineering, and Mathematics',
