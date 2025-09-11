@@ -1,0 +1,615 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "LearnLocal FastAPI Server",
+    "description": "FastAPI server with GPT-OSS model integration for the LearnLocal learning app",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000",
+      "description": "Local development server"
+    }
+  ],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "summary": "Health Check",
+        "description": "Check if the server and GPT-OSS model are running",
+        "responses": {
+          "200": {
+            "description": "Server is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "healthy"
+                    },
+                    "model": {
+                      "type": "string",
+                      "example": "gpt-oss"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat": {
+      "post": {
+        "summary": "Chat with AI",
+        "description": "Send a message to the GPT-OSS model for chat interaction",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "description": "User's message",
+                    "example": "Explain photosynthesis in simple terms"
+                  },
+                  "model": {
+                    "type": "string",
+                    "description": "Model to use",
+                    "example": "gpt-oss"
+                  }
+                },
+                "required": ["message", "model"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "AI response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "response": {
+                      "type": "string",
+                      "description": "AI's response to the user's message"
+                    },
+                    "model": {
+                      "type": "string",
+                      "example": "gpt-oss"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/generate-lesson": {
+      "post": {
+        "summary": "Generate Educational Lesson",
+        "description": "Generate a structured educational lesson using the GPT-OSS model",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "messages": {
+                    "type": "array",
+                    "description": "Conversation messages for lesson generation",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "role": {
+                          "type": "string",
+                          "enum": ["system", "developer", "user", "assistant"],
+                          "description": "Role of the message sender"
+                        },
+                        "content": {
+                          "type": "string",
+                          "description": "Message content"
+                        }
+                      },
+                      "required": ["role", "content"]
+                    },
+                    "example": [
+                      {
+                        "role": "system",
+                        "content": "You are an expert educational content creator specializing in creating engaging, interactive lessons for learners of all ages."
+                      },
+                      {
+                        "role": "developer",
+                        "content": "Create an educational lesson with the following requirements: Topic: Solar System, Category: Science, Technology, Engineering, and Mathematics, Difficulty: beginner (Use simple language, basic concepts, and include lots of examples. Suitable for ages 8-12.), Duration: Approximately 15 minutes, Language: English. Format the response as a JSON object with these fields: title, content (markdown formatted), activities (Array of 3-5 interactive activities), keyPoints (Array of 3-5 key learning points), estimatedDuration (Duration in minutes)"
+                      },
+                      {
+                        "role": "user",
+                        "content": "Please generate a beginner level lesson about 'Solar System' in the stem category."
+                      }
+                    ]
+                  },
+                  "model": {
+                    "type": "string",
+                    "description": "Model to use for generation",
+                    "example": "gpt-oss"
+                  },
+                  "maxTokens": {
+                    "type": "integer",
+                    "description": "Maximum tokens to generate",
+                    "example": 2000
+                  }
+                },
+                "required": ["messages", "model"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Generated lesson",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "response": {
+                      "type": "string",
+                      "description": "JSON string containing the generated lesson",
+                      "example": "{\"title\": \"Exploring Our Solar System\", \"content\": \"# Exploring Our Solar System\\n\\nOur solar system is like a big family of planets, moons, and other objects that all orbit around our Sun...\\n\\n## What is the Solar System?\\n\\nThe solar system consists of the Sun and everything that orbits around it, including eight planets, their moons, asteroids, comets, and dust.\", \"activities\": [\"Create a model of the solar system using clay or playdough\", \"Draw and label all eight planets in order from the Sun\", \"Research one planet and present three fun facts to the class\", \"Play a solar system memory game with planet cards\", \"Write a short story about traveling to your favorite planet\"], \"keyPoints\": [\"The Sun is the center of our solar system and provides light and heat\", \"There are eight planets that orbit the Sun in a specific order\", \"Each planet has unique characteristics like size, temperature, and atmosphere\", \"Earth is the only planet we know of that supports life\", \"The solar system also contains moons, asteroids, and comets\"], \"estimatedDuration\": 15}"
+                    },
+                    "model": {
+                      "type": "string",
+                      "example": "gpt-oss"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/generate-quiz": {
+      "post": {
+        "summary": "Generate Quiz",
+        "description": "Generate a quiz based on lesson content",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "messages": {
+                    "type": "array",
+                    "description": "Conversation messages for quiz generation",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "role": {
+                          "type": "string",
+                          "enum": ["system", "developer", "user", "assistant"]
+                        },
+                        "content": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "lessonId": {
+                    "type": "string",
+                    "description": "ID of the lesson to create quiz for"
+                  },
+                  "model": {
+                    "type": "string",
+                    "example": "gpt-oss"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Generated quiz",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "response": {
+                      "type": "string",
+                      "description": "JSON string containing quiz questions"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/translate": {
+      "post": {
+        "summary": "Translate Text",
+        "description": "Translate text to different languages",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "description": "Text to translate",
+                    "example": "Hello, how are you?"
+                  },
+                  "targetLanguage": {
+                    "type": "string",
+                    "description": "Target language code",
+                    "example": "es"
+                  },
+                  "sourceLanguage": {
+                    "type": "string",
+                    "description": "Source language code (optional)",
+                    "example": "en"
+                  }
+                },
+                "required": ["text", "targetLanguage"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Translated text",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "translatedText": {
+                      "type": "string",
+                      "description": "The translated text"
+                    },
+                    "sourceLanguage": {
+                      "type": "string",
+                      "description": "Detected or provided source language"
+                    },
+                    "targetLanguage": {
+                      "type": "string",
+                      "description": "Target language"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tts": {
+      "post": {
+        "summary": "Text-to-Speech",
+        "description": "Generate audio from text using local TTS model",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "description": "Text to convert to speech",
+                    "example": "Welcome to our lesson about the solar system."
+                  },
+                  "language": {
+                    "type": "string",
+                    "description": "Language for speech synthesis",
+                    "example": "en"
+                  },
+                  "model": {
+                    "type": "string",
+                    "description": "TTS model to use",
+                    "example": "local-tts"
+                  }
+                },
+                "required": ["text"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Generated audio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "audioUrl": {
+                      "type": "string",
+                      "description": "URL to the generated audio file"
+                    },
+                    "duration": {
+                      "type": "number",
+                      "description": "Duration of audio in seconds"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/modules": {
+      "get": {
+        "summary": "Get Learning Modules",
+        "description": "Retrieve available learning modules",
+        "responses": {
+          "200": {
+            "description": "List of learning modules",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "content": {
+                        "type": "string"
+                      },
+                      "difficulty": {
+                        "type": "string",
+                        "enum": ["beginner", "intermediate", "advanced"]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/models/available": {
+      "get": {
+        "summary": "Get Available Models",
+        "description": "Get list of available AI models for download",
+        "responses": {
+          "200": {
+            "description": "List of available models",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "string"
+                      },
+                      "size": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "downloadUrl": {
+                        "type": "string"
+                      },
+                      "isRequired": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/models/status": {
+      "get": {
+        "summary": "Get Model Status",
+        "description": "Check which models are currently installed and loaded",
+        "responses": {
+          "200": {
+            "description": "Model status information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean",
+                    "description": "Whether the model is installed and ready"
+                  },
+                  "example": {
+                    "GPT-OSS Base": true,
+                    "Translation Model": false,
+                    "TTS Model": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/models/download": {
+      "post": {
+        "summary": "Download Model",
+        "description": "Initiate download of a specific AI model",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "modelName": {
+                    "type": "string",
+                    "description": "Name of the model to download"
+                  },
+                  "downloadUrl": {
+                    "type": "string",
+                    "description": "URL to download the model from"
+                  }
+                },
+                "required": ["modelName", "downloadUrl"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Download initiated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "download_started"
+                    },
+                    "modelName": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/models/install": {
+      "post": {
+        "summary": "Install Model",
+        "description": "Install a downloaded model",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "modelName": {
+                    "type": "string",
+                    "description": "Name of the model to install"
+                  }
+                },
+                "required": ["modelName"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Model installed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "installed"
+                    },
+                    "modelName": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Message": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": ["system", "developer", "user", "assistant"]
+          },
+          "content": {
+            "type": "string"
+          }
+        },
+        "required": ["role", "content"]
+      },
+      "GeneratedLesson": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Lesson title"
+          },
+          "content": {
+            "type": "string",
+            "description": "Main lesson content in markdown format"
+          },
+          "activities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of interactive activities"
+          },
+          "keyPoints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Key learning points"
+          },
+          "estimatedDuration": {
+            "type": "integer",
+            "description": "Estimated duration in minutes"
+          }
+        }
+      }
+    }
+  }
+}
