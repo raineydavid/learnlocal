@@ -152,9 +152,9 @@ export class LearnLocalAPI {
     }
   }
 
-  async generateHarmonyLesson(request: HarmonyRequest): Promise<HarmonyResponse> {
+  async generateLesson(request: HarmonyRequest): Promise<HarmonyResponse> {
     try {
-      const response = await fetch(`${this.baseURL}/api/harmony/generate-lesson`, {
+      const response = await fetch(`${this.baseURL}/api/generate-lesson`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -163,19 +163,19 @@ export class LearnLocalAPI {
       });
 
       if (!response.ok) {
-        throw new Error(`Harmony API request failed: ${response.status}`);
+        throw new Error(`Lesson generation failed: ${response.status}`);
       }
 
       return await response.json();
     } catch (error) {
-      console.error('Harmony API error:', error);
+      console.error('Lesson generation error:', error);
       throw error;
     }
   }
 
-  async generateHarmonyQuiz(request: HarmonyRequest & { lessonId: string }): Promise<HarmonyResponse> {
+  async generateQuiz(request: HarmonyRequest & { lessonId: string }): Promise<HarmonyResponse> {
     try {
-      const response = await fetch(`${this.baseURL}/api/harmony/generate-quiz`, {
+      const response = await fetch(`${this.baseURL}/api/generate-quiz`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -184,12 +184,12 @@ export class LearnLocalAPI {
       });
 
       if (!response.ok) {
-        throw new Error(`Harmony Quiz API request failed: ${response.status}`);
+        throw new Error(`Quiz generation failed: ${response.status}`);
       }
 
       return await response.json();
     } catch (error) {
-      console.error('Harmony Quiz API error:', error);
+      console.error('Quiz generation error:', error);
       throw error;
     }
   }

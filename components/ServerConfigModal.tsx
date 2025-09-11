@@ -132,7 +132,7 @@ export default function ServerConfigModal({ visible, currentUrl, onSave, onClose
             <View style={styles.warningBox}>
               <AlertCircle size={16} color="#F59E0B" />
               <Text style={styles.warningText}>
-                Required endpoints: /api/health, /api/chat, /api/harmony/generate-lesson
+                Required endpoints: /api/health, /api/chat, /api/generate-lesson
               </Text>
             </View>
           </View>

@@ -83,7 +83,7 @@ Make the lesson engaging, interactive, and age-appropriate. Include real-world e
     try {
       const conversation = this.createLessonPrompt(request);
       
-      const response = await fetch(`${this.baseURL}/api/harmony/generate-lesson`, {
+      const response = await fetch(`${this.baseURL}/api/generate-lesson`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -183,7 +183,7 @@ Make the lesson engaging, interactive, and age-appropriate. Include real-world e
         ]
       };
 
-      const response = await fetch(`${this.baseURL}/api/harmony/generate-quiz`, {
+      const response = await fetch(`${this.baseURL}/api/generate-quiz`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
