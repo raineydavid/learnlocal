@@ -317,27 +317,29 @@ const communityProgress = {
 - **Use Case**: Local development and high-performance scenarios
 
 #### **Option 3: Embedded Server (Mobile-Optimized)**
+```typescript
+app.add_middleware(
+     CORSMiddleware,
+     allow_origins=[
+         "http://localhost:8081",
+         "https://localhost:8081", 
+         "exp://localhost:8081",
+         "https://bibliographical-flaggingly-bailee.ngrok-free.app"
+     ],
+     allow_credentials=True,
+     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+     allow_headers=[
+         "Content-Type", 
+         "Authorization", 
+         "Accept", 
+         "Access-Control-Allow-Origin",
+         "Origin",
+         "X-Requested-With",
+         "ngrok-skip-browser-warning"
+     ],
+ )
+```
 - **Built-in API**: Express.js server embedded in the app
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=[
-#         "http://localhost:8081",
-#         "https://localhost:8081", 
-#         "exp://localhost:8081",
-#         "https://bibliographical-flaggingly-bailee.ngrok-free.app"
-#     ],
-#     allow_credentials=True,
-#     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-#     allow_headers=[
-#         "Content-Type", 
-#         "Authorization", 
-#         "Accept", 
-#         "Access-Control-Allow-Origin",
-#         "Origin",
-#         "X-Requested-With",
-#         "ngrok-skip-browser-warning"
-#     ],
-# )
 - **Lightweight AI**: Embedded AI processing with local models
 - **Zero Configuration**: No external server required
 - **Offline-First**: Complete functionality without internet
