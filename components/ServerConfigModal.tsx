@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Modal, Alert } from 'react-native';
 import { useState } from 'react';
-import { X, Server, CheckCircle, AlertCircle } from 'lucide-react-native';
+import { X, Server, CircleCheck as CheckCircle, CircleAlert as AlertCircle } from 'lucide-react-native';
 
 interface ServerConfigModalProps {
   visible: boolean;
