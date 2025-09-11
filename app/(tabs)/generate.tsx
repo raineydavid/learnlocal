@@ -1,14 +1,16 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
-import { Sparkles, BookOpen, Clock, Target } from 'lucide-react-native';
+import { Sparkles, BookOpen, Clock, Target, Zap, Cloud } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { harmonyLessonService, LessonRequest, GeneratedLesson } from '@/services/harmonyService';
+import { api } from '@/services/api';
 
 export default function GenerateTab() {
   const [topic, setTopic] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'stem' | 'creative-arts' | 'our-world'>('stem');
   const [selectedDifficulty, setSelectedDifficulty] = useState<'beginner' | 'intermediate' | 'advanced'>('beginner');
+  const [selectedProvider, setSelectedProvider] = useState<'gpt-oss' | 'huggingface'>('gpt-oss');
   const [duration, setDuration] = useState('15');
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -22,6 +24,23 @@ export default function GenerateTab() {
     { id: 'beginner' as const, title: 'Beginner', description: 'Ages 8-12, Simple concepts' },
     { id: 'intermediate' as const, title: 'Intermediate', description: 'Ages 13-16, Moderate complexity' },
     { id: 'advanced' as const, title: 'Advanced', description: 'Ages 17+, Complex concepts' },
+  ];
+
+  const providers = [
+    { 
+      id: 'gpt-oss' as const, 
+      title: 'GPT-OSS Local', 
+      description: 'Local 20B model on your server',
+      icon: Zap,
+      color: '#4F46E5'
+    },
+    { 
+      id: 'huggingface' as const, 
+      title: 'Hugging Face', 
+      description: 'Cloud-based AI models',
+      icon: Cloud,
+      color: '#F59E0B'
+    },
   ];
 
   const generateLesson = async () => {
@@ -39,6 +58,7 @@ export default function GenerateTab() {
         difficulty: selectedDifficulty,
         duration: parseInt(duration) || 15,
         language: 'English',
+        provider: selectedProvider,
       };
 
       const generatedLesson = await harmonyLessonService.generateLesson(request);
@@ -82,6 +102,42 @@ export default function GenerateTab() {
               multiline
               maxLength={200}
             />
+          </View>
+
+          <View style={styles.inputSection}>
+            <Text style={styles.label}>AI Model Provider</Text>
+            <View style={styles.providerGrid}>
+              {providers.map((provider) => {
+                const IconComponent = provider.icon;
+                return (
+                  <TouchableOpacity
+                    key={provider.id}
+                    style={[
+                      styles.providerCard,
+                      selectedProvider === provider.id && { backgroundColor: provider.color }
+                    ]}
+                    onPress={() => setSelectedProvider(provider.id)}
+                  >
+                    <IconComponent 
+                      size={24} 
+                      color={selectedProvider === provider.id ? "#FFFFFF" : provider.color} 
+                    />
+                    <Text style={[
+                      styles.providerTitle,
+                      selectedProvider === provider.id && styles.selectedProviderTitle
+                    ]}>
+                      {provider.title}
+                    </Text>
+                    <Text style={[
+                      styles.providerDescription,
+                      selectedProvider === provider.id && styles.selectedProviderDescription
+                    ]}>
+                      {provider.description}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
           </View>
 
           <View style={styles.inputSection}>
@@ -170,7 +226,7 @@ export default function GenerateTab() {
           </TouchableOpacity>
           
           <Text style={styles.generateNote}>
-            Your lesson will be created using the local GPT-OSS model
+            Your lesson will be created using {selectedProvider === 'gpt-oss' ? 'the local GPT-OSS model' : 'Hugging Face cloud models'}
           </Text>
         </View>
       </ScrollView>
@@ -228,6 +284,40 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     minHeight: 80,
     textAlignVertical: 'top',
+  },
+  providerGrid: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  providerCard: {
+    flex: 1,
+    backgroundColor: '#334155',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    minHeight: 100,
+    justifyContent: 'center',
+  },
+  providerTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  selectedProviderTitle: {
+    color: '#FFFFFF',
+  },
+  providerDescription: {
+    fontSize: 12,
+    color: '#94A3B8',
+    textAlign: 'center',
+    lineHeight: 16,
+  },
+  selectedProviderDescription: {
+    color: '#FFFFFF',
+    opacity: 0.9,
   },
   categoryGrid: {
     flexDirection: 'row',

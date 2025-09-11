@@ -10,12 +10,13 @@ import {
   Platform 
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Send, Bot, User } from 'lucide-react-native';
+import { Send, Bot, User, Zap, Cloud } from 'lucide-react-native';
 import TranslationBar from '@/components/TranslationBar';
 import ChatMessageRenderer from '@/components/ChatMessageRenderer';
 import { offlineService, CachedChat } from '@/services/offlineService';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { useEffect } from 'react';
+import { api } from '@/services/api';
 
 interface Message {
   id: string;
@@ -28,7 +29,7 @@ export default function ChatTab() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: 'Hello! I\'m your AI learning assistant powered by GPT-OSS. How can I help you learn today?',
+      text: 'Hello! I\'m your AI learning assistant. How can I help you learn today?',
       isUser: false,
       timestamp: new Date(),
     },
@@ -38,10 +39,12 @@ export default function ChatTab() {
   const scrollViewRef = useRef<ScrollView>(null);
   const networkStatus = useNetworkStatus();
   const [chatId] = useState(`chat-${Date.now()}`);
+  const [currentProvider, setCurrentProvider] = useState<'gpt-oss' | 'huggingface'>('gpt-oss');
 
   // Load cached messages on component mount
   useEffect(() => {
     loadCachedMessages();
+    setCurrentProvider(api.getProvider());
   }, []);
 
   // Save messages to cache whenever messages change
@@ -91,10 +94,23 @@ export default function ChatTab() {
     setIsLoading(true);
 
     // If offline, provide offline response
-    if (!networkStatus.isConnected) {
+    if (!networkStatus.isConnected && currentProvider === 'gpt-oss') {
       const offlineMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: 'I\'m currently offline, but I can still help with basic questions using cached knowledge. For new lesson generation, please connect to the internet and ensure your FastAPI server is running.',
+        text: 'I\'m currently offline, but I can still help with basic questions using cached knowledge. For new lesson generation, please connect to the internet.',
+        isUser: false,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, offlineMessage]);
+      setIsLoading(false);
+      return;
+    }
+
+    // If using Hugging Face but offline
+    if (!networkStatus.isConnected && currentProvider === 'huggingface') {
+      const offlineMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: 'Hugging Face models require an internet connection. Please connect to the internet to use cloud-based AI features.',
         isUser: false,
         timestamp: new Date(),
       };
@@ -104,45 +120,25 @@ export default function ChatTab() {
     }
 
     try {
-      // TODO: Replace with actual FastAPI endpoint
-      const response = await fetch('http://localhost:8000/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify({
-          message: userMessage.text,
-          model: 'gpt-oss',
-        }),
-        mode: 'cors',
+      const response = await api.sendChatMessage({
+        message: userMessage.text,
+        model: currentProvider,
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        const aiMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          text: data.response,
-          isUser: false,
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, aiMessage]);
-      } else {
-        // Fallback response for demo
-        const aiMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          text: 'I\'m having trouble connecting to the learning model. Please check your FastAPI server is running on localhost:8000',
-          isUser: false,
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, aiMessage]);
-      }
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: response.response,
+        isUser: false,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
       // Fallback response for demo
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: 'I\'m having trouble connecting to the learning model. Please make sure your FastAPI server is running and accessible.',
+        text: currentProvider === 'huggingface' 
+          ? 'I\'m having trouble connecting to Hugging Face. Please check your internet connection.'
+          : 'I\'m having trouble connecting to the learning model. Please make sure your server is running and accessible.',
         isUser: false,
         timestamp: new Date(),
       };
@@ -160,8 +156,21 @@ export default function ChatTab() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>AI Learning Assistant</Text>
-        <Text style={styles.subtitle}>Powered by local GPT-OSS model</Text>
+        <View style={styles.headerContent}>
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>AI Learning Assistant</Text>
+            <View style={styles.providerIndicator}>
+              {currentProvider === 'gpt-oss' ? (
+                <Zap size={16} color="#4F46E5" />
+              ) : (
+                <Cloud size={16} color="#F59E0B" />
+              )}
+              <Text style={styles.providerText}>
+                {currentProvider === 'gpt-oss' ? 'GPT-OSS Local' : 'Hugging Face'}
+              </Text>
+            </View>
+          </View>
+        </View>
       </View>
 
       <KeyboardAvoidingView 
@@ -234,15 +243,28 @@ const styles = StyleSheet.create({
     borderBottomColor: '#334155',
     backgroundColor: '#1E293B',
   },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  titleContainer: {
+    flex: 1,
+  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#FFFFFF',
+    marginBottom: 4,
   },
-  subtitle: {
+  providerIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  providerText: {
     fontSize: 14,
     color: '#94A3B8',
-    marginTop: 4,
   },
   content: {
     flex: 1,

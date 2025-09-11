@@ -1,5 +1,5 @@
 import { offlineService, CachedLesson } from './offlineService';
-import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import { api } from './api';
 
 export interface LessonRequest {
   topic: string;
@@ -7,6 +7,7 @@ export interface LessonRequest {
   category: 'stem' | 'creative-arts' | 'our-world';
   language?: string;
   duration?: number; // minutes
+  provider?: 'gpt-oss' | 'huggingface';
 }
 
 export interface GeneratedLesson {
@@ -19,6 +20,7 @@ export interface GeneratedLesson {
   keyPoints: string[];
   estimatedDuration: number;
   createdAt: Date;
+  provider: 'gpt-oss' | 'huggingface';
 }
 
 export interface HarmonyMessage {
@@ -103,38 +105,29 @@ Make the lesson engaging, interactive, and age-appropriate. Include real-world e
         keyPoints: existingLesson.keyPoints,
         estimatedDuration: existingLesson.estimatedDuration,
         createdAt: existingLesson.createdAt,
+        provider: request.provider || 'gpt-oss'
       };
     }
 
     try {
-      const conversation = this.createLessonPrompt(request);
-      
-      const response = await fetch(`${this.baseURL}/api/generate-lesson`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify({
-          messages: conversation.messages,
-          model: 'gpt-oss',
-          maxTokens: 2000,
-        }),
-        mode: 'cors',
-      });
-
-      if (!response.ok) {
-        throw new Error(`Lesson generation failed: ${response.status}`);
+      // Set the provider in the API service
+      if (request.provider) {
+        api.setProvider(request.provider);
       }
 
-      const data = await response.json();
+      const conversation = this.createLessonPrompt(request);
+      
+      const data = await api.generateLesson({
+        conversation,
+        model: request.provider || 'gpt-oss',
+        maxTokens: 2000,
+      });
       
       // Parse the generated lesson content
       let lessonData;
       try {
         // Handle different response formats
-        const content = data.response || data.content || data.message || '';
+        const content = data.response || data.content || '';
         
         // Try to extract JSON from the response
         const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -145,7 +138,7 @@ Make the lesson engaging, interactive, and age-appropriate. Include real-world e
         }
       } catch (parseError) {
         // Fallback if the model doesn't return valid JSON
-        const content = data.response || data.content || data.message || 'Generated lesson content';
+        const content = data.response || data.content || 'Generated lesson content';
         lessonData = {
           title: `${request.topic} Lesson`,
           content: content,
@@ -173,6 +166,7 @@ Make the lesson engaging, interactive, and age-appropriate. Include real-world e
         keyPoints: lessonData.keyPoints || [],
         estimatedDuration: lessonData.estimatedDuration || request.duration || 15,
         createdAt: new Date(),
+        provider: request.provider || 'gpt-oss'
       };
 
       // Cache the generated lesson for offline use
@@ -205,6 +199,7 @@ Make the lesson engaging, interactive, and age-appropriate. Include real-world e
         ],
         estimatedDuration: request.duration || 15,
         createdAt: new Date(),
+        provider: request.provider || 'gpt-oss'
       };
 
       // Cache the fallback lesson too
@@ -237,26 +232,11 @@ Make the lesson engaging, interactive, and age-appropriate. Include real-world e
         ]
       };
 
-      const response = await fetch(`${this.baseURL}/api/generate-quiz`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify({
-          conversation,
-          lessonId,
-          model: 'gpt-oss',
-        }),
-        mode: 'cors',
+      return await api.generateQuiz({
+        conversation,
+        lessonId,
+        model: 'gpt-oss',
       });
-
-      if (!response.ok) {
-        throw new Error(`Quiz generation failed: ${response.status}`);
-      }
-
-      return await response.json();
     } catch (error) {
       console.error('Quiz generation error:', error);
       return null;

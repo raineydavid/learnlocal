@@ -11,6 +11,7 @@ export interface CachedLesson {
   estimatedDuration: number;
   createdAt: Date;
   cachedAt: Date;
+  provider?: 'gpt-oss' | 'huggingface';
 }
 
 export interface CachedChat {
@@ -67,6 +68,11 @@ export class OfflineService {
       console.error('Failed to get cached lessons:', error);
       return [];
     }
+  }
+
+  async getCachedLessonsByProvider(provider: 'gpt-oss' | 'huggingface'): Promise<CachedLesson[]> {
+    const allLessons = await this.getCachedLessons();
+    return allLessons.filter(lesson => lesson.provider === provider);
   }
 
   async getCachedLessonById(id: string): Promise<CachedLesson | null> {

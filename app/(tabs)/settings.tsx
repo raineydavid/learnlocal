@@ -1,11 +1,11 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Settings as SettingsIcon, Server, Globe, Bell, Shield, CircleHelp as HelpCircle, Download, Languages, Volume2, CreditCard as Edit3, Share2, Wifi, Bluetooth } from 'lucide-react-native';
+import { Settings as SettingsIcon, Server, Globe, Bell, Shield, CircleHelp as HelpCircle, Download, Languages, Volume2, CreditCard as Edit3, Share2, Wifi, Bluetooth, Zap, Cloud } from 'lucide-react-native';
 import { useState, useEffect } from 'react';
 import { router } from 'expo-router';
 import DeviceSharingModal from '@/components/DeviceSharingModal';
 import ServerConfigModal from '@/components/ServerConfigModal';
-import { api } from '@/services/api';
+import { api, ModelProvider } from '@/services/api';
 import { offlineService } from '@/services/offlineService';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 
@@ -13,6 +13,8 @@ export default function SettingsTab() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [offlineMode, setOfflineMode] = useState(false);
   const [useEmbeddedServer, setUseEmbeddedServer] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState<'gpt-oss' | 'huggingface'>('gpt-oss');
+  const [availableProviders, setAvailableProviders] = useState<ModelProvider[]>([]);
   const [showServerConfig, setShowServerConfig] = useState(false);
   const [showDeviceSharing, setShowDeviceSharing] = useState(false);
   const [serverUrl, setServerUrl] = useState('http://localhost:8000');
@@ -31,7 +33,18 @@ export default function SettingsTab() {
   useEffect(() => {
     checkServerStatus();
     loadCacheInfo();
+    loadAvailableProviders();
   }, [serverUrl]);
+
+  const loadAvailableProviders = async () => {
+    try {
+      const providers = await api.getAvailableProviders();
+      setAvailableProviders(providers);
+      setSelectedProvider(api.getProvider());
+    } catch (error) {
+      console.error('Failed to load providers:', error);
+    }
+  };
 
   const loadCacheInfo = async () => {
     try {
@@ -66,6 +79,11 @@ export default function SettingsTab() {
     setServerUrl(newUrl);
     api.updateBaseURL(newUrl);
     checkServerStatus();
+  };
+
+  const handleProviderChange = (provider: 'gpt-oss' | 'huggingface') => {
+    setSelectedProvider(provider);
+    api.setProvider(provider);
   };
 
   const toggleEmbeddedServer = async (enabled: boolean) => {
@@ -134,6 +152,49 @@ export default function SettingsTab() {
           
           <View style={styles.settingItem}>
             <View style={styles.settingLeft}>
+              <Globe size={20} color="#3B82F6" />
+              <View style={styles.settingText}>
+                <Text style={styles.settingTitle}>AI Provider</Text>
+                <Text style={styles.settingSubtitle}>
+                  {selectedProvider === 'gpt-oss' ? 'Local GPT-OSS Model' : 'Hugging Face Cloud'}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.providerSelector}>
+            {availableProviders.map((provider) => (
+              <TouchableOpacity
+                key={provider.id}
+                style={[
+                  styles.providerCard,
+                  selectedProvider === provider.id && styles.selectedProviderCard
+                ]}
+                onPress={() => handleProviderChange(provider.id)}
+              >
+                {provider.id === 'gpt-oss' ? (
+                  <Zap size={24} color={selectedProvider === provider.id ? "#FFFFFF" : "#4F46E5"} />
+                ) : (
+                  <Cloud size={24} color={selectedProvider === provider.id ? "#FFFFFF" : "#F59E0B"} />
+                )}
+                <Text style={[
+                  styles.providerTitle,
+                  selectedProvider === provider.id && styles.selectedProviderTitle
+                ]}>
+                  {provider.name}
+                </Text>
+                <Text style={[
+                  styles.providerDescription,
+                  selectedProvider === provider.id && styles.selectedProviderDescription
+                ]}>
+                  {provider.description}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <View style={styles.settingItem}>
+            <View style={styles.settingLeft}>
               <Server size={20} color="#3B82F6" />
               <View style={styles.settingText}>
                 <Text style={styles.settingTitle}>Embedded Server</Text>
@@ -154,29 +215,29 @@ export default function SettingsTab() {
           <TouchableOpacity 
             style={styles.settingItem}
             onPress={() => setShowServerConfig(true)}
-            disabled={useEmbeddedServer}
+            disabled={useEmbeddedServer || selectedProvider === 'huggingface'}
           >
             <View style={styles.settingLeft}>
               <Server size={20} color="#3B82F6" />
               <View style={styles.settingText}>
                 <Text style={styles.settingTitle}>FastAPI Server</Text>
                 <Text style={styles.settingSubtitle}>
-                  {useEmbeddedServer ? 'Using embedded server' : serverUrl}
+                  {useEmbeddedServer ? 'Using embedded server' : 
+                   selectedProvider === 'huggingface' ? 'Using Hugging Face API' : serverUrl}
                 </Text>
               </View>
             </View>
-            <Edit3 size={16} color={useEmbeddedServer ? "#6B7280" : "#94A3B8"} />
+            <Edit3 size={16} color={useEmbeddedServer || selectedProvider === 'huggingface' ? "#6B7280" : "#94A3B8"} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.settingItem}>
-            <View style={styles.settingLeft}>
-              <Globe size={20} color="#3B82F6" />
-              <View style={styles.settingText}>
-                <Text style={styles.settingTitle}>Model Configuration</Text>
-                <Text style={styles.settingSubtitle}>GPT-OSS Local Model</Text>
-              </View>
+          {selectedProvider === 'huggingface' && (
+            <View style={styles.infoBox}>
+              <Cloud size={16} color="#F59E0B" />
+              <Text style={styles.infoText}>
+                Hugging Face models run in the cloud. No local server required, but internet connection is needed.
+              </Text>
             </View>
-          </TouchableOpacity>
+          )}
         </View>
 
         <View style={styles.section}>
@@ -347,11 +408,23 @@ export default function SettingsTab() {
           <View style={styles.statusItem}>
             <View style={[
               styles.statusDot, 
-              (serverStatus === 'online' || embeddedServerState.isRunning) ? styles.statusOnline : 
+              selectedProvider === 'huggingface' ? styles.statusOnline : styles.statusChecking
+            ]} />
+            <Text style={styles.statusText}>
+              AI Provider: {selectedProvider === 'gpt-oss' ? 'GPT-OSS Local' : 'Hugging Face Cloud'}
+            </Text>
+          </View>
+
+          <View style={styles.statusItem}>
+            <View style={[
+              styles.statusDot, 
+              (serverStatus === 'online' || embeddedServerState.isRunning || selectedProvider === 'huggingface') ? styles.statusOnline : 
               serverStatus === 'checking' ? styles.statusChecking : styles.statusOffline
             ]} />
             <Text style={styles.statusText}>
-              {useEmbeddedServer ? 'Embedded' : 'FastAPI'} Server: {
+              {selectedProvider === 'huggingface' ? 'Cloud API' :
+               useEmbeddedServer ? 'Embedded' : 'FastAPI'} Server: {
+                selectedProvider === 'huggingface' ? 'Connected' :
                 embeddedServerState.isRunning ? 'Connected' :
                 serverStatus === 'online' ? 'Connected' :
                 serverStatus === 'checking' ? 'Checking...' : 'Disconnected'
@@ -361,15 +434,17 @@ export default function SettingsTab() {
           <View style={styles.statusItem}>
             <View style={[
               styles.statusDot, 
-              (serverStatus === 'online' || embeddedServerState.isRunning) ? styles.statusOnline : styles.statusOffline
+              (serverStatus === 'online' || embeddedServerState.isRunning || selectedProvider === 'huggingface') ? styles.statusOnline : styles.statusOffline
             ]} />
             <Text style={styles.statusText}>
-              AI Model: {(serverStatus === 'online' || embeddedServerState.isRunning) ? 'Available' : 'Not Available'}
+              AI Model: {(serverStatus === 'online' || embeddedServerState.isRunning || selectedProvider === 'huggingface') ? 'Available' : 'Not Available'}
             </Text>
           </View>
           
           <Text style={styles.statusNote}>
-            {useEmbeddedServer 
+            {selectedProvider === 'huggingface' 
+              ? 'Using Hugging Face cloud models. Internet connection required for AI features.'
+              : useEmbeddedServer 
               ? 'Using built-in AI server for offline functionality. No external server required.'
               : `Make sure your FastAPI server is running on ${serverUrl} with the GPT-OSS model loaded.`
             }
@@ -416,6 +491,46 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingHorizontal: 20,
   },
+  providerSelector: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    gap: 12,
+    marginBottom: 16,
+  },
+  providerCard: {
+    flex: 1,
+    backgroundColor: '#334155',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  selectedProviderCard: {
+    backgroundColor: '#4F46E5',
+    borderColor: '#6366F1',
+  },
+  providerTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  selectedProviderTitle: {
+    color: '#FFFFFF',
+  },
+  providerDescription: {
+    fontSize: 12,
+    color: '#94A3B8',
+    textAlign: 'center',
+    lineHeight: 16,
+  },
+  selectedProviderDescription: {
+    color: '#FFFFFF',
+    opacity: 0.9,
+  },
   settingItem: {
     backgroundColor: '#334155',
     paddingHorizontal: 20,
@@ -444,6 +559,22 @@ const styles = StyleSheet.create({
   settingSubtitle: {
     fontSize: 14,
     color: '#94A3B8',
+  },
+  infoBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#451A03',
+    marginHorizontal: 20,
+    padding: 12,
+    borderRadius: 8,
+    gap: 8,
+    marginBottom: 16,
+  },
+  infoText: {
+    fontSize: 12,
+    color: '#F59E0B',
+    flex: 1,
+    lineHeight: 16,
   },
   connectionStatus: {
     margin: 20,

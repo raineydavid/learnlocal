@@ -40,8 +40,16 @@ export interface HarmonyResponse {
   model: string;
 }
 
+export interface ModelProvider {
+  id: 'gpt-oss' | 'huggingface';
+  name: string;
+  description: string;
+  available: boolean;
+}
+
 export class LearnLocalAPI {
   private baseURL: string;
+  private selectedProvider: 'gpt-oss' | 'huggingface' = 'gpt-oss';
 
   constructor(baseURL: string = 'http://localhost:8000') {
     this.baseURL = baseURL;
@@ -55,8 +63,45 @@ export class LearnLocalAPI {
     return this.baseURL;
   }
 
+  setProvider(provider: 'gpt-oss' | 'huggingface') {
+    this.selectedProvider = provider;
+  }
+
+  getProvider(): 'gpt-oss' | 'huggingface' {
+    return this.selectedProvider;
+  }
+
+  async getAvailableProviders(): Promise<ModelProvider[]> {
+    return [
+      {
+        id: 'gpt-oss',
+        name: 'GPT-OSS Local',
+        description: 'Local GPT-OSS 20B model running on your FastAPI server',
+        available: true
+      },
+      {
+        id: 'huggingface',
+        name: 'Hugging Face',
+        description: 'Cloud-based models from Hugging Face Hub',
+        available: true
+      }
+    ];
+  }
+
   async sendChatMessage(request: ChatRequest): Promise<ChatResponse> {
     try {
+      // Route to appropriate provider
+      if (this.selectedProvider === 'huggingface') {
+        const { huggingFaceService } = await import('./huggingFaceService');
+        const response = await huggingFaceService.chatCompletion(request.message);
+        return {
+          response,
+          model: 'huggingface',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Default to GPT-OSS
       const response = await fetch(`${this.baseURL}/api/chat`, {
         method: 'POST',
         headers: {
@@ -161,6 +206,18 @@ export class LearnLocalAPI {
 
   async translateText(text: string, targetLanguage: string, sourceLanguage?: string) {
     try {
+      // Route to appropriate provider
+      if (this.selectedProvider === 'huggingface') {
+        const { huggingFaceService } = await import('./huggingFaceService');
+        const translatedText = await huggingFaceService.translateText(text, targetLanguage, sourceLanguage);
+        return {
+          translatedText,
+          sourceLanguage: sourceLanguage || 'auto',
+          targetLanguage
+        };
+      }
+
+      // Default to GPT-OSS
       const response = await fetch(`${this.baseURL}/api/translate`, {
         method: 'POST',
         headers: {
@@ -192,6 +249,32 @@ export class LearnLocalAPI {
 
   async generateLesson(request: HarmonyRequest): Promise<HarmonyResponse> {
     try {
+      // Route to appropriate provider
+      if (this.selectedProvider === 'huggingface') {
+        const { huggingFaceService } = await import('./huggingFaceService');
+        
+        // Extract lesson parameters from messages
+        const userMessage = request.conversation.messages.find(m => m.role === 'user')?.content || '';
+        const developerMessage = request.conversation.messages.find(m => m.role === 'developer')?.content || '';
+        
+        const topicMatch = userMessage.match(/about ["']([^"']+)["']/i) || developerMessage.match(/Topic: ([^,\n]+)/i);
+        const difficultyMatch = userMessage.match(/(beginner|intermediate|advanced)/i) || developerMessage.match(/Difficulty: ([^,\n]+)/i);
+        const categoryMatch = developerMessage.match(/Category: ([^,\n]+)/i);
+        
+        const topic = topicMatch?.[1] || 'General Learning';
+        const difficulty = difficultyMatch?.[1]?.toLowerCase() || 'beginner';
+        const category = categoryMatch?.[1]?.toLowerCase().replace(/\s+/g, '-') || 'general';
+        
+        const lesson = await huggingFaceService.generateLesson(topic, difficulty, category);
+        
+        return {
+          content: JSON.stringify(lesson),
+          tokens: 0,
+          model: 'huggingface'
+        };
+      }
+
+      // Default to GPT-OSS
       const response = await fetch(`${this.baseURL}/api/generate-lesson`, {
         method: 'POST',
         headers: {
