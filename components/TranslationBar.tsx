@@ -43,12 +43,19 @@ export default function TranslationBar({ text, onTranslate }: TranslationBarProp
   };
 
   const handleSpeak = async () => {
-    if (isSpeaking) {
-      await audioService.stopSpeaking();
-      setIsSpeaking(false);
-    } else {
-      setIsSpeaking(true);
-      await audioService.speakText(text, { language: currentLanguage });
+    // Note: This is now handled by the LessonPlayer component
+    // Keep this for backward compatibility but recommend using LessonPlayer
+    try {
+      if (isSpeaking) {
+        await audioService.stopSpeaking();
+        setIsSpeaking(false);
+      } else {
+        setIsSpeaking(true);
+        await audioService.speakText(text, { language: currentLanguage });
+        setIsSpeaking(false);
+      }
+    } catch (error) {
+      console.error('Speech error:', error);
       setIsSpeaking(false);
     }
   };

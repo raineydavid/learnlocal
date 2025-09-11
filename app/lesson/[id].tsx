@@ -4,6 +4,7 @@ import { ChevronLeft } from 'lucide-react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import TranslationBar from '@/components/TranslationBar';
+import LessonPlayer from '@/components/LessonPlayer';
 
 export default function LessonScreen() {
   const { id } = useLocalSearchParams();
@@ -131,6 +132,11 @@ Art not only provides a creative outlet but also helps develop problem-solving s
               setTranslatedContent(translatedText);
               setCurrentLanguage(language);
             }}
+          />
+          
+          <LessonPlayer 
+            text={translatedContent || lesson.content}
+            title={lesson.title}
           />
           
           <Text style={styles.contentText}>

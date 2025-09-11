@@ -5,6 +5,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { GeneratedLesson } from '@/services/harmonyService';
 import TranslationBar from '@/components/TranslationBar';
+import LessonPlayer from '@/components/LessonPlayer';
 
 export default function GeneratedLessonScreen() {
   const { id, lessonData } = useLocalSearchParams();
@@ -88,6 +89,11 @@ export default function GeneratedLessonScreen() {
               setTranslatedContent(translatedText);
               setCurrentLanguage(language);
             }}
+          />
+          
+          <LessonPlayer 
+            text={translatedContent || lesson.content}
+            title={lesson.title}
           />
           
           <Text style={styles.contentText}>
