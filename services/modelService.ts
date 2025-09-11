@@ -29,6 +29,7 @@ export class ModelService {
         headers: {
           'Accept': 'application/json',
           'Access-Control-Allow-Origin': '*',
+          'ngrok-skip-browser-warning': 'true',
         },
         mode: 'cors',
       });
@@ -77,6 +78,7 @@ export class ModelService {
         headers: {
           'Accept': 'application/json',
           'Access-Control-Allow-Origin': '*',
+          'ngrok-skip-browser-warning': 'true',
         },
         mode: 'cors',
       });
@@ -106,6 +108,7 @@ export class ModelService {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
           'Access-Control-Allow-Origin': '*',
+          'ngrok-skip-browser-warning': 'true',
         },
         body: JSON.stringify({
           modelName: model.name,
@@ -147,6 +150,7 @@ export class ModelService {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
           'Access-Control-Allow-Origin': '*',
+          'ngrok-skip-browser-warning': 'true',
         },
         body: JSON.stringify({ modelName }),
         mode: 'cors',

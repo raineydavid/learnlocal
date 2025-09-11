@@ -53,6 +53,7 @@ export class AudioService {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
           'Access-Control-Allow-Origin': '*',
+          'ngrok-skip-browser-warning': 'true',
         },
         body: JSON.stringify({
           text,

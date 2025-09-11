@@ -44,6 +44,7 @@ export default function ServerConfigModal({ visible, currentUrl, onSave, onClose
         headers: {
           'Accept': 'application/json',
           'Access-Control-Allow-Origin': '*',
+          'ngrok-skip-browser-warning': 'true',
         },
         mode: 'cors',
       });
