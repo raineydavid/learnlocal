@@ -151,11 +151,12 @@ export class LearnLocalAPI {
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
           'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept',
+          'Origin': window.location.origin,
           'ngrok-skip-browser-warning': 'true',
         },
         body: JSON.stringify(request),
         mode: 'cors',
-        credentials: 'omit',
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -178,10 +179,11 @@ export class LearnLocalAPI {
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
           'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept',
+          'Origin': window.location.origin,
           'ngrok-skip-browser-warning': 'true',
         },
         mode: 'cors',
-        credentials: 'omit',
+        credentials: 'include',
       });
       
       if (!response.ok) {
@@ -204,10 +206,11 @@ export class LearnLocalAPI {
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
           'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept',
+          'Origin': window.location.origin,
           'ngrok-skip-browser-warning': 'true',
         },
         mode: 'cors',
-        credentials: 'omit',
+        credentials: 'include',
       });
       
       if (!response.ok) {
@@ -231,11 +234,12 @@ export class LearnLocalAPI {
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
           'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept',
+          'Origin': window.location.origin,
           'ngrok-skip-browser-warning': 'true',
         },
         body: JSON.stringify(request),
         mode: 'cors',
-        credentials: 'omit',
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -271,6 +275,7 @@ export class LearnLocalAPI {
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
           'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept',
+          'Origin': window.location.origin,
           'ngrok-skip-browser-warning': 'true',
         },
         body: JSON.stringify({
@@ -279,7 +284,7 @@ export class LearnLocalAPI {
           sourceLanguage,
         }),
         mode: 'cors',
-        credentials: 'omit',
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -329,11 +334,12 @@ export class LearnLocalAPI {
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
           'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept',
+          'Origin': window.location.origin,
           'ngrok-skip-browser-warning': 'true',
         },
         body: JSON.stringify(request),
         mode: 'cors',
-        credentials: 'omit',
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -357,11 +363,12 @@ export class LearnLocalAPI {
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
           'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept',
+          'Origin': window.location.origin,
           'ngrok-skip-browser-warning': 'true',
         },
         body: JSON.stringify(request),
         mode: 'cors',
-        credentials: 'omit',
+        credentials: 'include',
       });
 
       if (!response.ok) {

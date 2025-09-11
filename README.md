@@ -523,28 +523,45 @@ const response = await fetch(`${baseURL}/api/endpoint`, {
 ```python
 # FastAPI CORS middleware configuration
 from fastapi.middleware.cors import CORSMiddleware
+import re
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*", "http://localhost:8081", "https://localhost:8081", "exp://localhost:8081"],
+    allow_origins=[
+        "http://localhost:8081",
+        "https://localhost:8081", 
+        "exp://localhost:8081",
+        "https://learnlocal-expo-app-y538.bolt.host"
+    ],
+    allow_origin_regex=r"https://.*\.ngrok\.io|https://.*\.ngrok-free\.app|https://.*\.bolt\.host|https://.*\.netlify\.app",
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization", "Accept", "Access-Control-Allow-Origin"],
+    allow_headers=[
+        "Content-Type", 
+        "Authorization", 
+        "Accept", 
+        "Access-Control-Allow-Origin",
+        "Origin",
+        "X-Requested-With",
+        "ngrok-skip-browser-warning"
+    ],
 )
 
 # Add OPTIONS handler for preflight requests
 @app.options("/{full_path:path}")
 async def options_handler(request: Request):
+    origin = request.headers.get("origin")
+    
     return Response(
         status_code=200,
         headers={
-            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Origin": origin or "*",
             "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept, Access-Control-Allow-Origin",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept, Access-Control-Allow-Origin, Origin, X-Requested-With, ngrok-skip-browser-warning",
             "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Expose-Headers": "Content-Length, Content-Type",
         }
     )
-)
 ```
 
 #### **Network Compatibility**

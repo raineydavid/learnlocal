@@ -30,9 +30,45 @@ export class EmbeddedAPIServer {
     // Enable CORS for React Native
     if (this.config.enableCors) {
       this.app.use(cors({
-        origin: ['*', 'http://localhost:8081', 'https://localhost:8081', 'exp://localhost:8081'],
+        origin: function(origin, callback) {
+          // Allow requests with no origin (mobile apps, Postman, etc.)
+          if (!origin) return callback(null, true);
+          
+          // Allow all origins for development
+          if (process.env.NODE_ENV !== 'production') {
+            return callback(null, true);
+          }
+          
+          // Allow specific origins in production
+          const allowedOrigins = [
+            'http://localhost:8081',
+            'https://localhost:8081', 
+            'exp://localhost:8081',
+            /^https:\/\/.*\.ngrok\.io$/,
+            /^https:\/\/.*\.ngrok-free\.app$/,
+            /^https:\/\/.*\.bolt\.host$/,
+            /^https:\/\/.*\.netlify\.app$/
+          ];
+          
+          const isAllowed = allowedOrigins.some(allowed => {
+            if (typeof allowed === 'string') {
+              return origin === allowed;
+            }
+            return allowed.test(origin);
+          });
+          
+          callback(null, isAllowed);
+        },
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Access-Control-Allow-Origin'],
+        allowedHeaders: [
+          'Content-Type', 
+          'Authorization', 
+          'Accept', 
+          'Access-Control-Allow-Origin',
+          'Origin',
+          'X-Requested-With',
+          'ngrok-skip-browser-warning'
+        ],
         credentials: true,
         preflightContinue: false,
         optionsSuccessStatus: 200
@@ -41,10 +77,16 @@ export class EmbeddedAPIServer {
 
     // Additional CORS headers for React Native
     this.app.use((req, res, next) => {
-      res.header('Access-Control-Allow-Origin', '*');
+      const origin = req.headers.origin;
+      if (origin) {
+        res.header('Access-Control-Allow-Origin', origin);
+      } else {
+        res.header('Access-Control-Allow-Origin', '*');
+      }
       res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept, Access-Control-Allow-Origin');
+      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept, Access-Control-Allow-Origin, Origin, X-Requested-With, ngrok-skip-browser-warning');
       res.header('Access-Control-Allow-Credentials', 'true');
+      res.header('Access-Control-Expose-Headers', 'Content-Length, Content-Type');
       
       // Handle preflight requests
       if (req.method === 'OPTIONS') {
