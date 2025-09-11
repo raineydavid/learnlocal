@@ -2,6 +2,14 @@
 
 A resilient, offline-first learning app built with Expo that integrates with FastAPI and local GPT-OSS models for AI-powered education. Designed to provide continuous learning access even in challenging circumstances.
 
+Slides and Context with Demo
+
+[![Watch the video](https://img.youtube.com/vi/KyvRLvIz6Os/default.jpg)](https://www.youtube.com/watch?v=KyvRLvIz6Os)
+
+Demo No Sound
+
+[![Watch the video](https://img.youtube.com/vi/epMD63Z1S80/maxresdefault.jpg)](https://youtube.com/shorts/epMD63Z1S80)
+
 ## 🌟 Features
 
 ### **Core Learning Features**
