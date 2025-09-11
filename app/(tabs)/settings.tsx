@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Settings as SettingsIcon, Server, Globe, Bell, Shield, CircleHelp as HelpCircle, Download, Languages, Volume2, CreditCard as Edit3 } from 'lucide-react-native';
 import { useState, useEffect } from 'react';
@@ -163,6 +163,32 @@ export default function SettingsTab() {
               thumbColor="#FFFFFF"
             />
           </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Offline Storage</Text>
+          
+          <View style={styles.settingItem}>
+            <View style={styles.settingLeft}>
+              <Download size={20} color="#3B82F6" />
+              <View style={styles.settingText}>
+                <Text style={styles.settingTitle}>Cached Content</Text>
+                <Text style={styles.settingSubtitle}>
+                  {cacheSize.totalMB.toFixed(1)} MB stored locally
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <TouchableOpacity style={styles.settingItem} onPress={clearCache}>
+            <View style={styles.settingLeft}>
+              <Shield size={20} color="#EF4444" />
+              <View style={styles.settingText}>
+                <Text style={styles.settingTitle}>Clear Cache</Text>
+                <Text style={styles.settingSubtitle}>Remove all cached lessons and chats</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.section}>
