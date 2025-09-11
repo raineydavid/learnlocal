@@ -260,6 +260,30 @@ const communityProgress = {
 - **Deployment**: Running on remote machine, accessed via ngrok tunnel
 - **Use Case**: Shared AI server, remote GPU access, collaborative development
 
+#### **Option 1: External Flask Server (via ngrok)**
+- **API Layer**: Flask server with RESTful endpoints
+- **AI Model**: Local GPT-OSS model integration
+- **Deployment**: Running on remote machine, accessed via ngrok tunnel
+- **Use Case**: Shared AI server, remote GPU access, collaborative development
+
+#### **Option 1: External Flask Server (via ngrok)**
+- **API Layer**: Flask server with RESTful endpoints
+- **AI Model**: Local GPT-OSS model integration
+- **Deployment**: Running on remote machine, accessed via ngrok tunnel
+- **Use Case**: Shared AI server, remote GPU access, collaborative development
+
+#### **Option 1: External Flask Server (via ngrok)**
+- **API Layer**: Flask server with RESTful endpoints
+- **AI Model**: Local GPT-OSS model integration
+- **Deployment**: Running on remote machine, accessed via ngrok tunnel
+- **Use Case**: Shared AI server, remote GPU access, collaborative development
+
+#### **Option 1: External Flask Server (via ngrok)**
+- **API Layer**: Flask server with RESTful endpoints
+- **AI Model**: Local GPT-OSS model integration
+- **Deployment**: Running on remote machine, accessed via ngrok tunnel
+- **Use Case**: Shared AI server, remote GPU access, collaborative development
+
 #### **Option 2: External FastAPI Server**
 - **API Layer**: FastAPI server with RESTful endpoints
 - **AI Model**: Local GPT-OSS model integration
