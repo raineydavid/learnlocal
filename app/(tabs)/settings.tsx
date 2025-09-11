@@ -231,7 +231,7 @@ const communityProgress = {
 - **Gamification**: Achievement badges and progress tracking motivate learning
 
 #### **🎨 Emotional Well-being**
-- **Positive Content**: "Good News" category focuses on uplifting stories
+- **Positive Content**: "Good News\" category focuses on uplifting stories
 - **Creative Expression**: Art and creative writing modules for emotional processing
 - **Success-Oriented**: Builds confidence through achievable learning goals
 - **Culturally Sensitive**: Adaptable content respects diverse backgrounds
@@ -425,11 +425,11 @@ const conversation = {
     },
     {
       role: 'developer',
-      content: `Create lesson: Topic: ${topic}, Difficulty: ${difficulty}...`
+      content: \`Create lesson: Topic: ${topic}, Difficulty: ${difficulty}...`
     },
     {
       role: 'user',
-      content: `Generate a ${difficulty} lesson about "${topic}"`
+      content: \`Generate a ${difficulty} lesson about "${topic}"`
     }
   ]
 };
@@ -578,7 +578,7 @@ app.use((req, res, next) => {
 #### **Frontend CORS Headers**
 ```typescript
 // All API requests include CORS headers
-const response = await fetch(`${baseURL}/api/endpoint`, {
+const response = await fetch(\`${baseURL}/api/endpoint`, {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -776,7 +776,7 @@ app.add_middleware(
 )
 ```
 
-**Issue**: `Network request failed` on mobile  
+**Issue**: `Network request failed\` on mobile  
 **Solution**:
 ```typescript
 // Use device IP instead of localhost
