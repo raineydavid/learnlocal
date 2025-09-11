@@ -5,7 +5,7 @@ import { X, Server, CircleCheck as CheckCircle, CircleAlert as AlertCircle } fro
 interface ServerConfigModalProps {
   visible: boolean;
   currentUrl: string;
-  onSave: (url: string) -> void;
+  onSave: (url: string)  => void;
   onClose: () => void;
 }
 
