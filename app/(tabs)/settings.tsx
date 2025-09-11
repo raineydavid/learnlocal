@@ -5,6 +5,8 @@ import { useState, useEffect } from 'react';
 import { router } from 'expo-router';
 import ServerConfigModal from '@/components/ServerConfigModal';
 import { api } from '@/services/api';
+import { offlineService } from '@/services/offlineService';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 
 export default function SettingsTab() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
@@ -12,10 +14,32 @@ export default function SettingsTab() {
   const [showServerConfig, setShowServerConfig] = useState(false);
   const [serverUrl, setServerUrl] = useState('http://localhost:8000');
   const [serverStatus, setServerStatus] = useState<'online' | 'offline' | 'checking'>('offline');
+  const [cacheSize, setCacheSize] = useState({ lessons: 0, chats: 0, totalMB: 0 });
+  const networkStatus = useNetworkStatus();
 
   useEffect(() => {
     checkServerStatus();
+    loadCacheInfo();
   }, [serverUrl]);
+
+  const loadCacheInfo = async () => {
+    try {
+      const size = await offlineService.getCacheSize();
+      setCacheSize(size);
+    } catch (error) {
+      console.error('Failed to load cache info:', error);
+    }
+  };
+
+  const clearCache = async () => {
+    try {
+      await offlineService.clearAllCache();
+      setCacheSize({ lessons: 0, chats: 0, totalMB: 0 });
+      Alert.alert('Success', 'Cache cleared successfully');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to clear cache');
+    }
+  };
 
   const checkServerStatus = async () => {
     setServerStatus('checking');

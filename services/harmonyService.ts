@@ -1,3 +1,6 @@
+import { offlineService, CachedLesson } from './offlineService';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+
 export interface LessonRequest {
   topic: string;
   difficulty: 'beginner' | 'intermediate' | 'advanced';
@@ -80,6 +83,29 @@ Make the lesson engaging, interactive, and age-appropriate. Include real-world e
   }
 
   async generateLesson(request: LessonRequest): Promise<GeneratedLesson> {
+    // First check if we have a cached lesson for this topic
+    const cachedLessons = await offlineService.getCachedLessons();
+    const existingLesson = cachedLessons.find(lesson => 
+      lesson.title.toLowerCase().includes(request.topic.toLowerCase()) &&
+      lesson.category === request.category &&
+      lesson.difficulty === request.difficulty
+    );
+
+    if (existingLesson) {
+      console.log('Using cached lesson for:', request.topic);
+      return {
+        id: existingLesson.id,
+        title: existingLesson.title,
+        category: existingLesson.category,
+        difficulty: existingLesson.difficulty,
+        content: existingLesson.content,
+        activities: existingLesson.activities,
+        keyPoints: existingLesson.keyPoints,
+        estimatedDuration: existingLesson.estimatedDuration,
+        createdAt: existingLesson.createdAt,
+      };
+    }
+
     try {
       const conversation = this.createLessonPrompt(request);
       
@@ -127,7 +153,7 @@ Make the lesson engaging, interactive, and age-appropriate. Include real-world e
         };
       }
 
-      return {
+      const generatedLesson = {
         id: `generated-${Date.now()}`,
         title: lessonData.title,
         category: request.category,
@@ -138,11 +164,20 @@ Make the lesson engaging, interactive, and age-appropriate. Include real-world e
         estimatedDuration: lessonData.estimatedDuration || request.duration || 15,
         createdAt: new Date(),
       };
+
+      // Cache the generated lesson for offline use
+      const cachedLesson: CachedLesson = {
+        ...generatedLesson,
+        cachedAt: new Date(),
+      };
+      await offlineService.cacheLessons([cachedLesson]);
+
+      return generatedLesson;
     } catch (error) {
       console.error('Lesson generation error:', error);
       
       // Fallback lesson
-      return {
+      const fallbackLesson = {
         id: `fallback-${Date.now()}`,
         title: `${request.topic} - ${request.difficulty} Level`,
         category: request.category,
@@ -161,6 +196,15 @@ Make the lesson engaging, interactive, and age-appropriate. Include real-world e
         estimatedDuration: request.duration || 15,
         createdAt: new Date(),
       };
+
+      // Cache the fallback lesson too
+      const cachedFallback: CachedLesson = {
+        ...fallbackLesson,
+        cachedAt: new Date(),
+      };
+      await offlineService.cacheLessons([cachedFallback]);
+
+      return fallbackLesson;
     }
   }
 

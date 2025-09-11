@@ -2,8 +2,27 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, ArrowRight } from 'lucide-react-native';
 import { router } from 'expo-router';
+import { offlineService } from '@/services/offlineService';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import { useState, useEffect } from 'react';
 
 export default function HomeTab() {
+  const [cachedLessons, setCachedLessons] = useState([]);
+  const networkStatus = useNetworkStatus();
+
+  useEffect(() => {
+    loadCachedLessons();
+  }, []);
+
+  const loadCachedLessons = async () => {
+    try {
+      const lessons = await offlineService.getCachedLessons();
+      setCachedLessons(lessons);
+    } catch (error) {
+      console.error('Failed to load cached lessons:', error);
+    }
+  };
+
   const categories = [
     {
       id: 'stem',

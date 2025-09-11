@@ -12,6 +12,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Send, Bot, User } from 'lucide-react-native';
 import TranslationBar from '@/components/TranslationBar';
+import { offlineService, CachedChat } from '@/services/offlineService';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 
 interface Message {
   id: string;
@@ -32,6 +34,45 @@ export default function ChatTab() {
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
+  const networkStatus = useNetworkStatus();
+  const [chatId] = useState(`chat-${Date.now()}`);
+
+  // Load cached messages on component mount
+  useEffect(() => {
+    loadCachedMessages();
+  }, []);
+
+  // Save messages to cache whenever messages change
+  useEffect(() => {
+    if (messages.length > 1) { // Don't cache just the initial message
+      saveChatToCache();
+    }
+  }, [messages]);
+
+  const loadCachedMessages = async () => {
+    try {
+      const cachedChats = await offlineService.getCachedChats();
+      if (cachedChats.length > 0) {
+        const lastChat = cachedChats[0];
+        setMessages(lastChat.messages);
+      }
+    } catch (error) {
+      console.error('Failed to load cached messages:', error);
+    }
+  };
+
+  const saveChatToCache = async () => {
+    try {
+      const cachedChat: CachedChat = {
+        id: chatId,
+        messages,
+        lastUpdated: new Date(),
+      };
+      await offlineService.cacheChat(cachedChat);
+    } catch (error) {
+      console.error('Failed to cache chat:', error);
+    }
+  };
 
   const sendMessage = async () => {
     if (inputText.trim() === '') return;
@@ -46,6 +87,19 @@ export default function ChatTab() {
     setMessages(prev => [...prev, userMessage]);
     setInputText('');
     setIsLoading(true);
+
+    // If offline, provide offline response
+    if (!networkStatus.isConnected) {
+      const offlineMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: 'I\'m currently offline, but I can still help with basic questions using cached knowledge. For new lesson generation, please connect to the internet and ensure your FastAPI server is running.',
+        isUser: false,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, offlineMessage]);
+      setIsLoading(false);
+      return;
+    }
 
     try {
       // TODO: Replace with actual FastAPI endpoint
